@@ -159,7 +159,7 @@ class ArticleSync():
                     'may_invalid': 0,  #是否可能无效（微博包含@ 或者#）
                     'vip_count' : article_info['IS_VIP'], # 主流媒体数
                     'negative_emotion_count': 1 if article_info['EMOTION'] == 2 else 0,   # 负面情感数
-                    'is_update_db':0  # 是否更新数据库  0 否 1 是； 默认 否
+                    'zero_ids':article_info['ZERO_ID']
                 }
 
                 result = tools.get_json_by_requests(url, data = data)

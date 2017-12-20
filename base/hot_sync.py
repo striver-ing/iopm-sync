@@ -24,32 +24,6 @@ class HotSync():
         self._es = ES()
 
     def _get_today_hots(self, text):
-        # body =  {
-        #     "query" : {
-        #         "filtered" : {
-        #             "filter" : {
-        #                 "range": {
-        #                     "RELEASE_TIME": { # 今日发布的数据汇聚的热点（正常应该按照release_time）TODO
-        #                       "gt": tools.get_current_date('%Y-%m-%d') + ' 00:00:00' # 今日
-        #                     }
-        #                     # "RECORD_TIME": { # 今日爬取到的数据汇聚的热点
-        #                     #   "gt": tools.get_current_date('%Y-%m-%d') + ' 00:00:00' # 今日
-        #                     # }
-        #                 }
-        #             }
-        #         }
-        #     },
-        #     "_source": [
-        #         "ID",
-        #         "TITLE",
-        #         "CONTENT",
-        #         "HOT",
-        #         "CLUES_IDS",
-        #         "VIP_COUNT",
-        #         "NEGATIVE_EMOTION_COUNT"
-        #     ]
-        # }
-
         body = {
           "query": {
             "filtered": {
@@ -140,7 +114,7 @@ class HotSync():
                         'article_count' : data['HOT'], # 文章总数
                         'vip_count': data["VIP_COUNT"],   # 主流媒体数
                         'negative_emotion_count': data["NEGATIVE_EMOTION_COUNT"],  # 负面情感数
-                        'is_update_db' : 0 #是否更新数据库  0 否 1 是； 默认 否
+                        'zero_ids':article_info['ZERO_ID']
                     }
 
                     result = tools.get_json_by_requests(url, data = data_args)
