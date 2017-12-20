@@ -1,0 +1,132 @@
+# -*- coding: utf-8 -*-
+'''
+Created on 2017-12-11 15:13
+---------
+@summary: 同步新闻
+---------
+@author: Administrator
+'''
+import sys
+sys.path.append('..')
+import init
+
+import utils.tools as tools
+from utils.log import log
+from db.elastic_search import ES
+from base.article_sync import ArticleSync
+
+ADDRESS = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
+IOPM_SERVICE_ADDRESS = tools.get_conf_value('config.conf', 'iopm_service', 'address')
+SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
+SYNC_TIME_FILE = 'iopm_sync/sync_time.txt'
+
+class WechatSync():
+    def __init__(self):
+        self._record_time = tools.get_json(tools.read_file(SYNC_TIME_FILE)) or {}
+        self._es = ES()
+        self._article_sync = ArticleSync()
+
+    def _get_per_record_time(self):
+        wechat_record_time = ''
+        wechat_record_time = self._record_time.get('wechat_record_time')
+
+        return wechat_record_time
+
+    def _record_now_record_time(self, record_time):
+        self._record_time['wechat_record_time'] = record_time
+        tools.write_file(SYNC_TIME_FILE, tools.dumps_json(self._record_time))
+
+    def get_wechat_article(self):
+        '''
+        @summary:
+        ---------
+        ---------
+        @result:
+        '''
+
+        wechat_record_time = self._get_per_record_time()
+        # wechat_record_time = '2017-12-29 20:57:19'
+        today_time = tools.get_current_date('%Y-%m-%d')
+        if wechat_record_time:
+            sql = "select * from wechat_article where record_time > '{record_time}' and release_time >= '{today_time} 00:00:00' and release_time <= '{today_time} 23:59:59' order by record_time".format(record_time = wechat_record_time, today_time = today_time)
+        else:
+            sql = "select * from wechat_article where release_time >= '{today_time} 00:00:00' and release_time <= '{today_time} 23:59:59' order by record_time".format(today_time = today_time)
+
+        url = 'http://{address}/_sql?sql={sql}'.format(address = ADDRESS, sql = sql)
+        log.debug(url)
+
+        wechat = tools.get_json_by_requests(url)
+        return wechat.get('hits', {}).get('hits', [])
+
+    @tools.log_function_time
+    def deal_wechat_article(self, wechat_article_list):
+        '''
+        @summary:处理微信
+        ---------
+        @param wechat_article_list:
+        {
+            "summary":"",
+            "like_num":2,
+            "cover":"",
+            "comment":[
+
+            ],
+            "record_time":"2017-11-20 22:26:32",
+            "author":"",
+            "source_url":"",
+            "url":"",
+            "read_num":2188,
+            "article_id":26508963361,
+            "title":"祠堂被拆迁，补偿款该归谁？",
+            "content":"",
+            "__biz":"MzA3NzMwODkyMQ==",
+            "account":"直播绍兴",
+            "release_time":"2017-11-29 19:40:22"
+        }
+
+        ---------
+        @result:
+        '''
+        article_infos = []
+        max_record_time = ''
+
+        for wechat_article in wechat_article_list:
+            wechat = wechat_article.get('_source')
+            # 组装article的值
+            article_info = self._article_sync.get_article_info()
+            # 使用wechat信息
+            article_info['TITLE'] = wechat.get('title')
+            article_info['CONTENT'] = wechat.get('content')
+            article_info['HOST'] = "mp.weixin.qq.com"
+            article_info['RELEASE_TIME'] = wechat.get('release_time')
+            # article_info['RELEASE_TIME'] = tools.get_current_date() # TEST
+            article_info['URL'] = wechat.get('url')
+            article_info['UUID'] = wechat.get('__biz')
+            article_info['WEBSITE_NAME'] = wechat.get('account')
+            article_info['AUTHOR'] = wechat.get('author')
+            article_info['INFO_TYPE'] = 2
+            article_info['ID'] = str(wechat.get('article_id'))
+            article_info['UP_COUNT'] = wechat.get('like_num')
+            article_info['REVIEW_COUNT'] = wechat.get('read_num')
+            article_info['COMMENT_COUNT'] = len(wechat.get('comment', []))
+            article_info['IMAGE_URL'] = wechat.get('cover')
+            article_info['SUMMARY'] = wechat.get('summary')
+
+            article_infos.append(article_info)
+
+            max_record_time = wechat.get('record_time')
+
+        self._article_sync.deal_article(article_infos)
+        self._record_now_record_time(max_record_time)
+
+if __name__ == '__main__':
+    while True:
+        wechat_sync = WechatSync()
+        wechat_article_list = wechat_sync.get_wechat_article()
+        # print(tools.dumps_json(wechat_article_list))
+        if not wechat_article_list:
+            log.debug('同步数据到最新 sleep %ds ...'%SLEEP_TIME)
+            tools.delay_time(SLEEP_TIME)
+
+        else:
+            wechat_sync.deal_wechat_article(wechat_article_list)
