@@ -23,10 +23,11 @@ from utils.log import log
 ADDRESS = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
 SYNC_TIME_FILE = 'iopm_sync/sync_time.txt'
 IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
+SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
 
 class ArticleSync():
-    def __init__(self):
-        self._record_time = tools.read_file(SYNC_TIME_FILE) or {}
+    def __init__(self, table):
+        self._record_time = tools.get_json(tools.read_file(SYNC_TIME_FILE)) or {}
         self._compare_keywords = CompareKeywords()
         self._summary = Summary()
         self._emotion = Emotion()
@@ -34,6 +35,8 @@ class ArticleSync():
         self._es = ES()
         self._hot_sync = HotSync()
         self._vip_checked = VipChecked()
+        self._table = table
+        self._per_record_time_key = '{table}_record_time'.format(table = self._table)
 
     def get_article_info(self):
         '''
@@ -88,6 +91,38 @@ class ArticleSync():
         }
 
         return article_clues_src
+
+    def get_per_record_time(self):
+        per_record_time = self._record_time.get(self._per_record_time_key)
+
+        return per_record_time
+
+    def record_now_record_time(self, record_time):
+        self._record_time[self._per_record_time_key] = record_time
+        tools.write_file(SYNC_TIME_FILE, tools.dumps_json(self._record_time))
+
+    def get_article(self):
+        '''
+        @summary: 目前取的是record_time 为了保证有数据， 正常应该取releast_time TODO
+        ---------
+        ---------
+        @result:
+        '''
+
+        per_record_time = self.get_per_record_time()
+
+        today_time = tools.get_current_date('%Y-%m-%d')
+        if per_record_time:
+            sql = "select * from {table} where record_time > '{record_time}' and release_time >= '{today_time} 00:00:00' and release_time <= '{today_time} 23:59:59' order by record_time".format(table = self._table, record_time = per_record_time, today_time = today_time)
+        else:
+            sql = "select * from {table} where release_time >= '{today_time} 00:00:00' and release_time <= '{today_time} 23:59:59' order by record_time".format(table = self._table, today_time = today_time)
+
+        url = 'http://{address}/_sql?sql={sql}'.format(address = ADDRESS, sql = sql)
+        log.debug(url)
+
+        article = tools.get_json_by_requests(url)
+        return article.get('hits', {}).get('hits', [])
+
 
     def deal_article(self, article_list):
         '''
