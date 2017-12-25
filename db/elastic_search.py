@@ -15,7 +15,7 @@ from elasticsearch import Elasticsearch
 import elasticsearch.helpers
 from utils.log import log
 
-ADDRESS = tools.get_conf_value('config.conf', 'elasticsearch', 'zjyq')
+ADDRESS = tools.get_conf_value('config.conf', 'elasticsearch', 'yqtj')
 
 class Singleton(object):
     def __new__(cls, *args, **kwargs):
