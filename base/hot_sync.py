@@ -23,18 +23,18 @@ class HotSync():
     def __init__(self):
         self._es = ES()
 
-    def _get_today_hots(self, text):
+    def _get_today_hots(self, text, release_time):
+        release_day = release_time[:release_time.find(' ')]
+
         body = {
           "query": {
             "filtered": {
               "filter": {
                 "range": {
-                   "RELEASE_TIME": { # 今日发布的数据汇聚的热点（正常应该按照release_time）TODO
-                        "gt": tools.get_current_date('%Y-%m-%d') + ' 00:00:00' # 今日
+                   "RELEASE_TIME": { # 当日发布的新闻
+                        "gte": release_day + ' 00:00:00',
+                        "lte": release_day + ' 23:59:59'
                     }
-                    # "RECORD_TIME": { # 今日爬取到的数据汇聚的热点
-                    #   "gt": tools.get_current_date('%Y-%m-%d') + ' 00:00:00' # 今日
-                    # }
                 }
               },
               "query": {
@@ -74,9 +74,11 @@ class HotSync():
 
     def get_hot_id(self, article_info):
         article_text = article_info.get("TITLE")# + article_info.get("CONTENT")
+        release_time = article_info.get("RELEASE_TIME")
+
         article_text = tools.del_html_tag(article_text)
 
-        hots = self._get_today_hots(article_text)
+        hots = self._get_today_hots(article_text, release_time)
 
         # 找最相似的热点
         similar_hot = None

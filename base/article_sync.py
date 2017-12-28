@@ -20,7 +20,9 @@ from summary.summary import Summary
 from emotion.emotion import Emotion
 from utils.log import log
 
-ADDRESS = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
+DATA_POOL = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
+YQTJ = tools.get_conf_value('config.conf', 'elasticsearch', 'yqtj')
+
 SYNC_TIME_FILE = 'iopm_sync/sync_time.txt'
 IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
 SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
@@ -32,7 +34,8 @@ class ArticleSync():
         self._summary = Summary()
         self._emotion = Emotion()
         self._word_cloud = WordCloud()
-        self._es = ES()
+        self._yqtj_es = ES(YQTJ)
+        self._data_pool_es = ES(DATA_POOL)
         self._hot_sync = HotSync()
         self._vip_checked = VipChecked()
         self._table = table
@@ -111,16 +114,42 @@ class ArticleSync():
 
         per_record_time = self.get_per_record_time()
 
-        today_time = tools.get_current_date('%Y-%m-%d')
         if per_record_time:
-            sql = "select * from {table} where record_time > '{record_time}' and release_time >= '{today_time} 00:00:00' and release_time <= '{today_time} 23:59:59' order by record_time".format(table = self._table, record_time = per_record_time, today_time = today_time)
+            body = {
+                "query": {
+                    "filtered": {
+                      "filter": {
+                        "range": {
+                            "record_time" : {
+                                "gt": per_record_time
+                            }
+                        }
+                      }
+                    }
+                },
+                "sort":[{"record_time":"asc"}]
+            }
+
         else:
-            sql = "select * from {table} where release_time >= '{today_time} 00:00:00' and release_time <= '{today_time} 23:59:59' order by record_time".format(table = self._table, today_time = today_time)
+            body = {
+                # "query": {
+                #     "filtered": {
+                #       "filter": {
+                #         "range": {
+                #            "release_time" : {
+                #                 "gte": today_time + ' 00:00:00', # 今日
+                #                 "lte": today_time + ' 23:59:59' # 今日
+                #             }
+                #         }
+                #       }
+                #     }
+                # },
+                "sort":[{"record_time":"asc"}]
+            }
 
-        url = 'http://{address}/_sql?sql={sql}'.format(address = ADDRESS, sql = sql)
-        log.debug(url)
+        log.debug(self._table + " => " + tools.dumps_json(body))
 
-        article = tools.get_json_by_requests(url)
+        article = self._data_pool_es.search(self._table, body)
         return article.get('hits', {}).get('hits', [])
 
 
@@ -163,7 +192,7 @@ class ArticleSync():
                     article_clues_src['ARTICLE_ID'] = article_info['ID']
 
                     article_clues_srcs.append(article_clues_src)
-                    self._es.add_batch(article_clues_srcs, "ID", 'tab_iopm_article_clues_src')
+                    self._yqtj_es.add_batch(article_clues_srcs, "ID", 'tab_iopm_article_clues_src')
 
             # 情感分析 (1 正 2 负 3 中立， 百度：0:负向，1:中性，2:正向)
             emotion = self._emotion.get_emotion(del_tag_content)
@@ -220,6 +249,7 @@ class ArticleSync():
             log.debug('''
                 title         %s
                 release_time  %s
+                record_time   %s
                 url           %s
                 匹配的关键字：%s
                 线索id        %s
@@ -227,16 +257,19 @@ class ArticleSync():
                 二级分类      %s
                 三级分类      %s
                 关键词-线索   %s
-                '''%(article_info['TITLE'], article_info['RELEASE_TIME'], article_info["URL"], keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues))
+                '''%(article_info['TITLE'], article_info['RELEASE_TIME'], article_info['RECORD_TIME'], article_info["URL"], keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues))
 
 
             # print(tools.dumps_json(article_info))
-            article_infos.append(article_info)
+            # article_infos.append(article_info)
 
-        # article入库
-        print('article入库')
-        # print(tools.dumps_json(article_infos))
-        self._es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
+            print('article入库')
+            self._yqtj_es.add('tab_iopm_article_info', article_info, article_info["ID"])
+
+        # article入库 批量
+        # print('article入库')
+        # # print(tools.dumps_json(article_infos))
+        # self._yqtj_es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
 
 if __name__ == '__main__':
     pass

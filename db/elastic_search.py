@@ -24,17 +24,15 @@ class Singleton(object):
 
         return cls._inst
 
-class ES(Singleton):
+class ES():
     def __init__(self, address = ADDRESS):
-        super(ES, self).__init__()
-        if not hasattr(self,'_es'):
-            try:
-                print(address.split(','))
-                self._es = Elasticsearch(address.split(','))
-            except Exception as e:
-                raise
-            else:
-                log.debug('连接到Elasticsearch')
+        try:
+            print(address.split(','))
+            self._es = Elasticsearch(address.split(','))
+        except Exception as e:
+            raise
+        else:
+            log.debug('连接到Elasticsearch')
 
     def add(self, table, data, data_id = None, doc_type = ''):
         '''
@@ -112,9 +110,8 @@ class ES(Singleton):
 
         except Exception as e:
             log.error(e)
-            return str(e)
-        else:
-            return datas
+
+        return datas
 
     def update_by_id(self, table, data_id, data, doc_type = ''):
         '''
@@ -174,19 +171,9 @@ if __name__ == '__main__':
     # hot = es.get('tab_iopm_hot_info', '1')
     # print(hot)
     body =  {
-        "query" : {
-            "filtered" : {
-                "filter" : {
-                    "range": {
-                        "RELEASE_TIME": {
-                          "gt": tools.get_current_date('%Y-%m-%d') + ' 00:00:00'
-                        }
-                    }
-                }
-            }
-        },
+        "sort":[{"RECORD_TIME":"desc"}],
         "_source": [
-            "RELEASE_TIME",
+            "RECORD_TIME",
             "ID"
         ]
     }
