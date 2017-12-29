@@ -55,19 +55,26 @@ class ES():
             return True
 
     def add_batch(self, datas, primary_key, table, doc_type =  ''):
-        actions = [
-            {
-                '_op_type': 'index',
-                '_index': table,
-                '_type': doc_type or table,
-                # '_score':1,
-                '_id':data[primary_key],
-                '_source': data
-            }
-            for data in datas
-        ]
+        try:
+            actions = [
+                {
+                    '_op_type': 'index',
+                    '_index': table,
+                    '_type': doc_type or table,
+                    # '_score':1,
+                    '_id':data[primary_key],
+                    '_source': data
+                }
+                for data in datas
+            ]
 
-        elasticsearch.helpers.bulk(self._es, actions)
+            elasticsearch.helpers.bulk(self._es, actions)
+
+        except Exception as e:
+            log.error(e)
+            return False
+        else:
+            return True
 
     def get(self, table, data_id, doc_type = '_all'):
         '''
@@ -87,9 +94,8 @@ class ES():
 
         except Exception as e:
             log.error(e)
-            return str(e)
-        else:
-            return datas
+
+        return datas
 
 
     def search(self, table, body = {}):
@@ -124,16 +130,28 @@ class ES():
         ---------
         @result:
         '''
+        try:
+            self._es.update(index = table, doc_type = doc_type or table, body = {"doc": data}, id = data_id)
+        except Exception as e:
+            log.debug(e)
+            return False
 
-
-        self._es.update(index = table, doc_type = doc_type or table, body = {"doc": data}, id = data_id)
+        return True
 
     def delete_by_id(self, table, data_id, doc_type = ''):
         """
         根据给定的id,删除文档
         :return:
         """
-        self._es.delete(index = table, doc_type = doc_type or table, id = data_id)
+
+        try:
+            self._es.delete(index = table, doc_type = doc_type or table, id = data_id)
+        except Exception as e:
+            log.debug(e)
+            return False
+
+        return True
+
 
     def set_mapping(self, table, mapping, doc_type):
         '''
