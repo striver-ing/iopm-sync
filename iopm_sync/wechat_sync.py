@@ -61,6 +61,7 @@ class WechatSync(ArticleSync):
             article_info['CONTENT'] = wechat.get('content')
             article_info['HOST'] = "mp.weixin.qq.com"
             article_info['RELEASE_TIME'] = wechat.get('release_time')
+            article_info['RECORD_TIME'] = wechat.get('record_time')
             # article_info['RELEASE_TIME'] = tools.get_current_date() # TEST
             article_info['URL'] = wechat.get('url')
             article_info['UUID'] = wechat.get('__biz')

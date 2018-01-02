@@ -24,13 +24,14 @@ from base.province_filter import ProvinceFilter
 DATA_POOL = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
 YQTJ = tools.get_conf_value('config.conf', 'elasticsearch', 'yqtj')
 
-SYNC_TIME_FILE = 'iopm_sync/sync_time.txt'
+SYNC_TIME_FILE = 'iopm_sync/sync_time/'
 IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
 SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
 
 class ArticleSync():
     def __init__(self, table):
-        self._record_time = tools.get_json(tools.read_file(SYNC_TIME_FILE)) or {}
+        self._sync_time_file = SYNC_TIME_FILE + table + '.txt'
+        self._record_time = tools.get_json(tools.read_file(self._sync_time_file)) or {}
         self._compare_keywords = CompareKeywords()
         self._summary = Summary()
         self._emotion = Emotion()
@@ -68,7 +69,7 @@ class ArticleSync():
             "CLUES_IDS":"",
             "UP_COUNT":None,
             "INTERACTION_COUNT":None,
-            "RECORD_TIME":tools.get_current_date(),
+            "RECORD_TIME":None,
             "COMMENT_COUNT":None,
             "IS_VIP":None,
             "INFO_TYPE":None,
@@ -99,12 +100,11 @@ class ArticleSync():
 
     def get_per_record_time(self):
         per_record_time = self._record_time.get(self._per_record_time_key)
-
         return per_record_time
 
     def record_now_record_time(self, record_time):
         self._record_time[self._per_record_time_key] = record_time
-        tools.write_file(SYNC_TIME_FILE, tools.dumps_json(self._record_time))
+        tools.write_file(self._sync_time_file, tools.dumps_json(self._record_time))
 
     def get_article(self):
         '''
@@ -176,6 +176,7 @@ class ArticleSync():
             # 地域过滤
             contain_airs = self._province_filter.find_contain_air(text)
             if not contain_airs:
+                # log.debug('%s 不包含 本地地名 pass' % article_info['TITLE'])
                 continue
 
             # 线索关键词比对

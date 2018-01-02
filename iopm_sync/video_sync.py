@@ -59,6 +59,7 @@ class VideoSync(ArticleSync):
             article_info['CONTENT'] = ''
             article_info['HOST'] = news.get('domain')
             article_info['RELEASE_TIME'] = news.get('release_time')
+            article_info['RECORD_TIME'] = news.get('record_time')
 
             # article_info['RELEASE_TIME'] = tools.get_current_date()
             article_info['URL'] = news.get('url')

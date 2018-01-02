@@ -54,6 +54,7 @@ class WeiboSync(ArticleSync):
             article_info['CONTENT'] = weibo.get('content')
             article_info['HOST'] = 'weibo.cn'
             article_info['RELEASE_TIME'] = weibo.get('release_time')
+            article_info['RECORD_TIME'] = weibo.get('record_time')
             article_info['URL'] = weibo.get('url')
             article_info['UUID'] = weibo.get('id')
             article_info['WEBSITE_NAME'] = '新浪微博'
