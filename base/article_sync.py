@@ -19,6 +19,7 @@ from base.vip_checked import VipChecked
 from summary.summary import Summary
 from emotion.emotion import Emotion
 from utils.log import log
+from base.province_filter import ProvinceFilter
 
 DATA_POOL = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
 YQTJ = tools.get_conf_value('config.conf', 'elasticsearch', 'yqtj')
@@ -38,6 +39,7 @@ class ArticleSync():
         self._data_pool_es = ES(DATA_POOL)
         self._hot_sync = HotSync()
         self._vip_checked = VipChecked()
+        self._province_filter = ProvinceFilter()
         self._table = table
         self._per_record_time_key = '{table}_record_time'.format(table = self._table)
 
@@ -164,14 +166,19 @@ class ArticleSync():
         article_infos = []
         # 补全剩余的信息
         for article_info in article_list:
-            # 互动量
             # print(tools.dumps_json(article_info))
-            article_info['INTERACTION_COUNT'] = (article_info['UP_COUNT'] or 0) + (article_info['TRANSMIT_COUNT'] or 0) + (article_info['REVIEW_COUNT'] or 0) + (article_info['COMMENT_COUNT'] or 0)
 
-            # 线索关键词比对
+            # 标题+内容文本信息
             del_tag_content = tools.del_html_tag(article_info['CONTENT'])
             text = article_info['TITLE'] + del_tag_content
             # print(text)
+
+            # 地域过滤
+            contain_airs = self._province_filter.find_contain_air(text)
+            if not contain_airs:
+                continue
+
+            # 线索关键词比对
             keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
 
             article_info['KEYWORDS'] = keywords
@@ -213,6 +220,9 @@ class ArticleSync():
             # 主流媒体
             is_vip = self._vip_checked.is_vip(article_info['URL']) or self._vip_checked.is_vip(article_info['WEBSITE_NAME'])
             article_info["IS_VIP"] = is_vip
+
+            # 互动量
+            article_info['INTERACTION_COUNT'] = (article_info['UP_COUNT'] or 0) + (article_info['TRANSMIT_COUNT'] or 0) + (article_info['REVIEW_COUNT'] or 0) + (article_info['COMMENT_COUNT'] or 0)
 
             # 计算相关度
             if article_info['CLUES_IDS']:
