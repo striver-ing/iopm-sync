@@ -71,8 +71,8 @@ class NewsSync(ArticleSync):
         self.record_now_record_time(max_record_time)
 
 if __name__ == '__main__':
+    news_sync = NewsSync()
     while True:
-        news_sync = NewsSync()
         news_article_list = news_sync.get_article()
         # print(news_article_list)
         if not news_article_list:

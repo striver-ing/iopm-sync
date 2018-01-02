@@ -78,8 +78,8 @@ class VideoSync(ArticleSync):
         self.record_now_record_time(max_record_time)
 
 if __name__ == '__main__':
+    video_sync = VideoSync()
     while True:
-        video_sync = VideoSync()
         video_news_list = video_sync.get_article()
         # print(video_news_list)
         if not video_news_list:

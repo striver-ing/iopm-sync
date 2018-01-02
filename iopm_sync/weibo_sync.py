@@ -72,8 +72,8 @@ class WeiboSync(ArticleSync):
         self.record_now_record_time(max_record_time)
 
 if __name__ == '__main__':
+    weibo_sync = WeiboSync()
     while True:
-        weibo_sync = WeiboSync()
         weibo_article_list = weibo_sync.get_article()
         # print(weibo_article_list)
         if not weibo_article_list:

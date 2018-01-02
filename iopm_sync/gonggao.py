@@ -9,10 +9,10 @@ from utils.export_data import ExportData
 client = pymongo.MongoClient("localhost",27017)
 db = client.gonggao
 
-if __name__ == '__main__':
-    db.gonggao_content.ensure_index('url', unique=True)
-    export_data = ExportData()
+db.gonggao_content.ensure_index('url', unique=True)
+export_data = ExportData()
 
+def spider_gonggao():
     urls = ['http://www.sapprft.gov.cn/sapprft/channels/6588.shtml', 'http://www.sapprft.gov.cn/sapprft/channels/6588_2.shtml',
     'http://www.sapprft.gov.cn/sapprft/channels/6588_3.shtml', 'http://www.sapprft.gov.cn/sapprft/channels/6588_4.shtml',
     'http://www.sapprft.gov.cn/sapprft/channels/6588_5.shtml']
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
             content_info = {'title': title, 'url': link, 'release_time': release_time, 'content': content}
 
-            print(link+ '    '+ release_time)
+            print(title+ '    '+ release_time)
 
             key_map = {
                 'id':'vint_sequence.nextval',
@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 'release_time':'date_release_time'
             }
 
-            def export_callback(execute_type, sql):
+            def export_callback(execute_type, sql, data_json):
                 if execute_type == ExportData.EXCEPTION:
                     print('共导出 %s 条公告'%count)
                     exit()
@@ -55,3 +55,6 @@ if __name__ == '__main__':
 
 
     print('共导出 %s 条公告'%count)
+
+if __name__ == '__main__':
+    spider_gonggao()

@@ -181,7 +181,7 @@ class ArticleSync():
             # 线索关键词比对
             keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
 
-            article_info['KEYWORDS'] = keywords
+            article_info['KEYWORDS'] = keywords + ','.join(set(contain_airs))
             article_info['CLUES_IDS'] = clues_ids
             article_info['ZERO_ID'] = zero_ids
             article_info['FIRST_ID'] = first_id
@@ -267,7 +267,8 @@ class ArticleSync():
                 二级分类      %s
                 三级分类      %s
                 关键词-线索   %s
-                '''%(article_info['TITLE'], article_info['RELEASE_TIME'], article_info['RECORD_TIME'], article_info["URL"], keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues))
+                地域          %s
+                '''%(article_info['TITLE'], article_info['RELEASE_TIME'], article_info['RECORD_TIME'], article_info["URL"], keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues, contain_airs))
 
 
             # print(tools.dumps_json(article_info))

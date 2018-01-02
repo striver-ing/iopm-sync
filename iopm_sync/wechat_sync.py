@@ -82,8 +82,8 @@ class WechatSync(ArticleSync):
         self.record_now_record_time(max_record_time)
 
 if __name__ == '__main__':
+    wechat_sync = WechatSync()
     while True:
-        wechat_sync = WechatSync()
         wechat_article_list = wechat_sync.get_article()
         # print(tools.dumps_json(wechat_article_list))
         if not wechat_article_list:
