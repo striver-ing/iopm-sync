@@ -182,7 +182,7 @@ class ArticleSync():
             # 线索关键词比对
             keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
 
-            article_info['KEYWORDS'] = keywords + ','.join(set(contain_airs))
+            article_info['KEYWORDS'] = keywords + ',' + ','.join(contain_airs) if keywords else ','.join(contain_airs)
             article_info['CLUES_IDS'] = clues_ids
             article_info['ZERO_ID'] = zero_ids
             article_info['FIRST_ID'] = first_id
