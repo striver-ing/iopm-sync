@@ -13,6 +13,8 @@ import init
 import utils.tools as tools
 from utils.log import log
 from base.article_sync import ArticleSync
+import pid
+pid.record_pid(__file__)
 
 SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
 
