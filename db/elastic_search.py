@@ -93,7 +93,8 @@ class ES():
             datas = self._es.get(index = table, doc_type = doc_type, id = data_id)
 
         except Exception as e:
-            log.error(e)
+            # log.error(e)
+            pass
 
         return datas
 
@@ -186,15 +187,3 @@ class ES():
 
 if __name__ == '__main__':
     es = ES()
-    # hot = es.get('tab_iopm_hot_info', '1')
-    # print(hot)
-    body =  {
-        "sort":[{"RECORD_TIME":"desc"}],
-        "_source": [
-            "RECORD_TIME",
-            "ID"
-        ]
-    }
-
-    hot = es.search('tab_iopm_hot_info', body)
-    print(tools.dumps_json(hot))

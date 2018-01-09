@@ -167,6 +167,24 @@ class ArticleSync():
         # 补全剩余的信息
         for article_info in article_list:
             # print(tools.dumps_json(article_info))
+            # 互动量
+            article_info['INTERACTION_COUNT'] = (article_info['UP_COUNT'] or 0) + (article_info['TRANSMIT_COUNT'] or 0) + (article_info['REVIEW_COUNT'] or 0) + (article_info['COMMENT_COUNT'] or 0)
+
+            # 检查库中是否已存在 存在则更新互动量
+            if self._yqtj_es.get('tab_iopm_article_info', article_info["ID"]):
+                log.debug('%s 已存在'%article_info['TITLE'])
+                data = {
+                    "INTERACTION_COUNT" : article_info['INTERACTION_COUNT'],
+                    "UP_COUNT" : article_info['UP_COUNT'],
+                    "TRANSMIT_COUNT" : article_info['TRANSMIT_COUNT'],
+                    "REVIEW_COUNT" : article_info['REVIEW_COUNT'],
+                    "COMMENT_COUNT" : article_info['COMMENT_COUNT']
+                }
+
+                # 更新舆情
+                self._yqtj_es.update_by_id("tab_iopm_article_info", data_id = article_info.get("ID"), data = data)
+                continue
+
 
             # 标题+内容文本信息
             del_tag_content = tools.del_html_tag(article_info['CONTENT'])
@@ -221,9 +239,6 @@ class ArticleSync():
             # 主流媒体
             is_vip = self._vip_checked.is_vip(article_info['URL']) or self._vip_checked.is_vip(article_info['WEBSITE_NAME'])
             article_info["IS_VIP"] = is_vip
-
-            # 互动量
-            article_info['INTERACTION_COUNT'] = (article_info['UP_COUNT'] or 0) + (article_info['TRANSMIT_COUNT'] or 0) + (article_info['REVIEW_COUNT'] or 0) + (article_info['COMMENT_COUNT'] or 0)
 
             # 计算相关度
             if article_info['CLUES_IDS']:
