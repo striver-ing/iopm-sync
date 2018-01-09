@@ -23,6 +23,7 @@ from base.province_filter import ProvinceFilter
 
 DATA_POOL = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
 YQTJ = tools.get_conf_value('config.conf', 'elasticsearch', 'yqtj')
+PROVINCE = tools.get_conf_value('config.conf', 'province', 'province')
 
 SYNC_TIME_FILE = 'iopm_sync/sync_time/'
 IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
@@ -193,7 +194,7 @@ class ArticleSync():
 
             # 地域过滤
             contain_airs = self._province_filter.find_contain_air(text)
-            if not contain_airs:
+            if not contain_airs and PROVINCE:
                 # log.debug('%s 不包含 本地地名 pass' % article_info['TITLE'])
                 continue
 
