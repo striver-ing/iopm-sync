@@ -23,33 +23,60 @@ class VipChecked(Singleton):
     def __init__(self):
         super(VipChecked, self).__init__()
         if not hasattr(self,'_vip_sites'):
-            self._vip_sites = set()
+            self._vip_sites = []
 
             self._oracledb = OracleDB()
 
             self.load_vip_site()
 
     def load_vip_site(self):
-        sql = 'select to_char(t.keyword2) from TAB_IOPM_CLUES t where zero_id = 7'
+        sql = 'select to_char(t.keyword2),t.zero_id,t.first_id, t.second_id from TAB_IOPM_CLUES t where zero_id = 7'
         sites = self._oracledb.find(sql)
         for site in sites:
-            site_list = site[0].split(',')
-            for site in site_list:
-                if site:
-                    self._vip_sites.add(site)
+            self._vip_sites.append(site)
 
         # print(self._vip_sites)
 
     def is_vip(self, content):
-        is_vip = False
+        '''
+        @summary: 判断是否是主流媒体
+        ---------
+        @param content: 网址 / 网站名 / 作者
+        ---------
+        @result:
+        is_vip (0 /1)
+        zero_id
+        first_id
+        second_id
+        '''
+
+        is_vip = 0
+        zero_id = first_id = second_id =  ''
+
+        if not content:
+            return False
+
         for site in self._vip_sites:
-            is_vip = (content or False) and ((site in content) or (content in site))
+            domains = site[0].split(',')
+            temp_zero_id = site[1]
+            temp_first_id = site[2]
+            temp_second_id = site[3]
+
+            for domain in domains:
+                if domain:
+                    is_vip = ((domain in content) or (content in domain))
+
+                    if is_vip:
+                        # print(is_vip, domain)
+                        zero_id = str(temp_zero_id)
+                        first_id = str(temp_first_id)
+                        second_id = str(temp_second_id)
+                        break
 
             if is_vip:
-                # print(site)
                 break
 
-        return int(is_vip)
+        return int(is_vip), zero_id, first_id, second_id
 
 if __name__ == '__main__':
     vip_checked = VipChecked()

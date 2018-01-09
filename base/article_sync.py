@@ -198,12 +198,12 @@ class ArticleSync():
                 continue
 
             # 线索关键词比对
-            keywords, clues_ids, zero_ids, first_id, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
+            keywords, clues_ids, zero_ids, first_ids, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
 
             article_info['KEYWORDS'] = keywords + ',' + ','.join(contain_airs) if keywords else ','.join(contain_airs)
             article_info['CLUES_IDS'] = clues_ids
             article_info['ZERO_ID'] = zero_ids
-            article_info['FIRST_ID'] = first_id
+            article_info['FIRST_ID'] = first_ids
             article_info['SECOND_ID'] = second_ids
             article_info['KEYWORDS_COUNT'] = len(keyword_clues)
             article_info['KEYWORD_CLUES_ID'] = str(keyword_clues)
@@ -237,8 +237,12 @@ class ArticleSync():
             article_info['EMOTION'] = emotion
 
             # 主流媒体
-            is_vip = self._vip_checked.is_vip(article_info['URL']) or self._vip_checked.is_vip(article_info['WEBSITE_NAME'])
+            is_vip, zero_id, first_id, second_id = self._vip_checked.is_vip(article_info['URL']) or self._vip_checked.is_vip(article_info['WEBSITE_NAME']) or self._vip_checked.is_vip(article_info['AUTHOR'])
             article_info["IS_VIP"] = is_vip
+            if is_vip:
+                article_info['ZERO_ID'] = article_info['ZERO_ID'] + ',' + zero_id
+                article_info['FIRST_ID'] = article_info['FIRST_ID'] + ',' + first_id
+                article_info['SECOND_ID'] = article_info['SECOND_ID'] + ',' + second_id
 
             # 计算相关度
             if article_info['CLUES_IDS']:
