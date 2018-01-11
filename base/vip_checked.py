@@ -11,23 +11,23 @@ sys.path.append('../')
 import utils.tools as tools
 from utils.log import log
 from db.oracledb import OracleDB
+import threading
 
-class Singleton(object):
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls,'_inst'):
-            cls._inst=super(Singleton,cls).__new__(cls, *args, **kwargs)
-
-        return cls._inst
-
-class VipChecked(Singleton):
+class VipChecked(threading.Thread):
     def __init__(self):
         super(VipChecked, self).__init__()
-        if not hasattr(self,'_vip_sites'):
-            self._vip_sites = []
+        self._vip_sites = []
 
-            self._oracledb = OracleDB()
+        self._oracledb = OracleDB()
 
+        self.load_vip_site()
+
+    def run(self):
+        while True:
+            tools.delay_time(60 * 60)
+            print('更新主流媒体...')
             self.load_vip_site()
+            print('更新主流媒体完毕')
 
     def load_vip_site(self):
         sql = 'select to_char(t.keyword2),t.zero_id,t.first_id, t.second_id from TAB_IOPM_CLUES t where zero_id = 7'
@@ -80,5 +80,6 @@ class VipChecked(Singleton):
 
 if __name__ == '__main__':
     vip_checked = VipChecked()
+    vip_checked.start()
     is_vip = vip_checked.is_vip('http://mp.weixin.qq.com/s?__biz=MzAxNDI5NTY2NQ==&mid=2650646782&idx=2&sn=00cfa2dac81ec96c1731482bbe7dc821&scene=0#wechat_redirect')
     print(is_vip)

@@ -13,11 +13,20 @@ import init
 import utils.tools as tools
 from db.oracledb import OracleDB
 from base.format_keywords import format_keywords
+import threading
 
-class CompareKeywords():
+class CompareKeywords(threading.Thread):
     def __init__(self):
+        super(CompareKeywords, self).__init__()
         self._oracledb = OracleDB()
         self._clues = self.get_clues()
+
+    def run(self):
+        while True:
+            tools.delay_time(60 * 60)
+            print('更新keywords...')
+            self._clues = self.get_clues()
+            print('更新keywords完毕')
 
     def get_clues(self):
         sql = 'select t.id clues_id,to_char(t.keyword2),to_char(t.keyword3),t.zero_id, FIRST_ID, second_id  from TAB_IOPM_CLUES t where zero_id != 7' # 7 为传播途径
@@ -68,6 +77,7 @@ class CompareKeywords():
 
 if __name__ == '__main__':
     compare_keywords = CompareKeywords()
+    compare_keywords.start()
     text = '聂辰席是中央宣传部的聂辰席&国家新闻出版广电总局'
 
     print(compare_keywords.get_contained_keys(text))

@@ -45,6 +45,9 @@ class ArticleSync():
         self._table = table
         self._per_record_time_key = '{table}_record_time'.format(table = self._table)
 
+        self._vip_checked.start()
+        self._compare_keywords.start()
+
     def get_article_info(self):
         '''
         @summary: 取article的结构信息
@@ -304,4 +307,4 @@ class ArticleSync():
         # self._yqtj_es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
 
 if __name__ == '__main__':
-    pass
+    passr
