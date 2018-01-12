@@ -53,12 +53,13 @@ class ProvinceFilter():
 
         for air in self._province_airs:
             if air in text:
+                print(air)
                 contain_airs.append(air)
 
-        return contain_airs
+        return list(set(contain_airs))
 
 if __name__ == '__main__':
-    province_filter = ProvinceFilter()
-    text = '浙江是个好地方'
+    province_filter = ProvinceFilter('山西')
+    text = '【铜川市政设施广告位收益去向成谜 记者采访城管局长称很忙】1月5日，《阳光报》11版刊登《市政设施广告位收益未上缴财政铜川市城市管理局回应：果皮箱由某公司购买收益归该公司所有》，市民质疑铜川市城区所有市政设施广告收益去向。对此，记者欲采访铜川市城市管理局局长杨桐林，对方称 ​...全文'
     contain_airs = province_filter.find_contain_air(text)
     print(contain_airs)
