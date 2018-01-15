@@ -197,9 +197,10 @@ class ArticleSync():
 
             # 地域过滤
             contain_airs = self._province_filter.find_contain_air(text)
+            weight_factor = 1 # 权重系数
             if not contain_airs and PROVINCE:
                 # log.debug('%s 不包含 本地地名 pass' % article_info['TITLE'])
-                continue
+                weight_factor = 0.01 # 不是本市的，权重系数较小； 权值 = 权重 * 权重系数
 
             # 线索关键词比对
             keywords, clues_ids, zero_ids, first_ids, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
@@ -249,21 +250,18 @@ class ArticleSync():
                 article_info['SECOND_ID'] = article_info['SECOND_ID'] + ',' + second_id
 
             # 计算相关度
-            if article_info['CLUES_IDS']:
-                url = IOPM_SERVICE_ADDRESS + 'related_sort'
-                data = {
-                    'article_id': article_info['ID'], # 文章id
-                    'clues_ids' :article_info['CLUES_IDS'], # 线索ids
-                    'may_invalid': 0,  #是否可能无效（微博包含@ 或者#）
-                    'vip_count' : article_info['IS_VIP'], # 主流媒体数
-                    'negative_emotion_count': 1 if article_info['EMOTION'] == 2 else 0,   # 负面情感数
-                    'zero_ids':article_info['ZERO_ID']
-                }
+            url = IOPM_SERVICE_ADDRESS + 'related_sort'
+            data = {
+                'article_id': article_info['ID'], # 文章id
+                'clues_ids' :article_info['CLUES_IDS'], # 线索ids
+                'may_invalid': 0,  #是否可能无效（微博包含@ 或者#）
+                'vip_count' : article_info['IS_VIP'], # 主流媒体数
+                'negative_emotion_count': 1 if article_info['EMOTION'] == 2 else 0,   # 负面情感数
+                'zero_ids':article_info['ZERO_ID']
+            }
 
-                result = tools.get_json_by_requests(url, data = data)
-                article_info['WEIGHT'] = result.get('weight', 0)
-            else:
-                article_info['WEIGHT'] = 0
+            result = tools.get_json_by_requests(url, data = data)
+            article_info['WEIGHT'] = result.get('weight', 0) * weight_factor
 
 
             # 词语图

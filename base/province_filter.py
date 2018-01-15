@@ -53,7 +53,6 @@ class ProvinceFilter():
 
         for air in self._province_airs:
             if air in text:
-                print(air)
                 contain_airs.append(air)
 
         return list(set(contain_airs))
