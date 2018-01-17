@@ -305,4 +305,4 @@ class ArticleSync():
         # self._yqtj_es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
 
 if __name__ == '__main__':
-    passr
+    pass

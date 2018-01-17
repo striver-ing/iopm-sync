@@ -61,7 +61,7 @@ class NewsSync(ArticleSync):
             # article_info['RELEASE_TIME'] = tools.get_current_date()
             article_info['URL'] = news.get('url')
             article_info['UUID'] = news.get('uuid')
-            article_info['WEBSITE_NAME'] = news.get('website')
+            article_info['WEBSITE_NAME'] = news.get('website') or news.get('domain')
             article_info['AUTHOR'] = news.get('author')
             article_info['INFO_TYPE'] = 1
             article_info['ID'] = news.get('uuid')
