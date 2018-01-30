@@ -225,8 +225,16 @@ class ArticleSync():
                     article_clues_srcs.append(article_clues_src)
                     self._yqtj_es.add_batch(article_clues_srcs, "ID", 'tab_iopm_article_clues_src')
 
+            # 词语图
+            word_cloud = self._word_cloud.get_word_cloud(del_tag_content)
+            article_info['WORD_CLOUD'] = tools.dumps_json(word_cloud)
+
+            # 摘要
+            if not article_info['SUMMARY']:
+                article_info['SUMMARY'] = self._summary.get_summary(del_tag_content)
+
             # 情感分析 (1 正 2 负 3 中立， 百度：0:负向，1:中性，2:正向)
-            emotion = self._emotion.get_emotion(del_tag_content)
+            emotion = self._emotion.get_emotion(article_info['SUMMARY'])
             if emotion == 0:
                 emotion = 2
 
@@ -262,15 +270,6 @@ class ArticleSync():
 
             result = tools.get_json_by_requests(url, data = data)
             article_info['WEIGHT'] = result.get('weight', 0) * weight_factor
-
-
-            # 词语图
-            word_cloud = self._word_cloud.get_word_cloud(del_tag_content)
-            article_info['WORD_CLOUD'] = tools.dumps_json(word_cloud)
-
-            # 摘要
-            if not article_info['SUMMARY']:
-                article_info['SUMMARY'] = self._summary.get_summary(del_tag_content)
 
             # 统计相似文章 热点
             if article_info['INFO_TYPE'] == 3: # 微博
