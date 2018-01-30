@@ -19,23 +19,19 @@ class VipChecked(threading.Thread):
         self._vip_sites = []
 
         self._oracledb = OracleDB()
-
-        self.load_vip_site()
+        self._vip_sites = self.load_vip_site()
 
     def run(self):
         while True:
             tools.delay_time(60 * 60)
             print('更新主流媒体...')
-            self.load_vip_site()
+            self._vip_sites = self.load_vip_site()
             print('更新主流媒体完毕')
 
     def load_vip_site(self):
         sql = 'select to_char(t.keyword2),t.zero_id,t.first_id, t.second_id from TAB_IOPM_CLUES t where zero_id = 7'
         sites = self._oracledb.find(sql)
-        for site in sites:
-            self._vip_sites.append(site)
-
-        # print(self._vip_sites)
+        return sites
 
     def is_vip(self, content):
         '''

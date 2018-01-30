@@ -122,6 +122,7 @@ class ArticleSync():
 
         if per_record_time:
             body = {
+                "size":200,
                 "query": {
                     "filtered": {
                       "filter": {
@@ -150,6 +151,7 @@ class ArticleSync():
                 #       }
                 #     }
                 # },
+                "size":200,
                 "sort":[{"record_time":"asc"}]
             }
 
@@ -293,15 +295,15 @@ class ArticleSync():
 
 
             # print(tools.dumps_json(article_info))
-            # article_infos.append(article_info)
+            article_infos.append(article_info)
 
-            print('article入库')
-            self._yqtj_es.add('tab_iopm_article_info', article_info, article_info["ID"])
+            # print('article入库')
+            # self._yqtj_es.add('tab_iopm_article_info', article_info, article_info["ID"])
 
         # article入库 批量
-        # print('article入库')
-        # # print(tools.dumps_json(article_infos))
-        # self._yqtj_es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
+        print('article批量入库 size = %s' %len(article_infos))
+        # print(tools.dumps_json(article_infos))
+        self._yqtj_es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
 
 if __name__ == '__main__':
     pass

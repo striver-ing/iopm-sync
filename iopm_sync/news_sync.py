@@ -13,6 +13,7 @@ import init
 import utils.tools as tools
 from utils.log import log
 from base.article_sync import ArticleSync
+import threading
 import pid
 pid.record_pid(__file__)
 
@@ -21,6 +22,7 @@ SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
 class NewsSync(ArticleSync):
     def __init__(self):
         super(NewsSync, self).__init__('news_article')
+        self._max_record_time = ''
 
     @tools.log_function_time
     def deal_news_article(self, news_article_list):
@@ -44,9 +46,8 @@ class NewsSync(ArticleSync):
         ---------
         @result:
         '''
-        article_infos = []
-        max_record_time = ''
 
+        article_infos = []
         for news_article in news_article_list:
             news = news_article.get('_source')
             # 组装article的值
@@ -68,18 +69,28 @@ class NewsSync(ArticleSync):
 
             article_infos.append(article_info)
 
-            max_record_time = news.get('record_time')
+            if news.get('record_time') > self._max_record_time:
+                self._max_record_time = news.get('record_time')
 
         self.deal_article(article_infos)
-        self.record_now_record_time(max_record_time)
 
 if __name__ == '__main__':
     news_sync = NewsSync()
+
     while True:
         news_article_list = news_sync.get_article()
-        # print(news_article_list)
         if not news_article_list:
-            log.debug('同步数据到最新 sleep %ds ...'%SLEEP_TIME)
             tools.delay_time(SLEEP_TIME)
         else:
-            news_sync.deal_news_article(news_article_list)
+            threads = []
+            while news_article_list:
+                # 多线程处理，每线程10个
+                thread = threading.Thread(target = news_sync.deal_news_article, args = (news_article_list[:5],))
+                del news_article_list[:5]
+                thread.start()
+                threads.append(thread)
+
+            for thread in threads:
+                thread.join()
+
+            news_sync.record_now_record_time(news_sync._max_record_time)
