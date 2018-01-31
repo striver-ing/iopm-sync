@@ -29,9 +29,20 @@ class VipChecked(threading.Thread):
             print('更新主流媒体完毕')
 
     def load_vip_site(self):
+        vip_site = []
+
         sql = 'select to_char(t.keyword2),t.zero_id,t.first_id, t.second_id from TAB_IOPM_CLUES t where zero_id = 7'
         sites = self._oracledb.find(sql)
-        return sites
+        for site in sites:
+            domains = site[0].split(',')
+            domains.remove('')
+            temp_zero_id = site[1]
+            temp_first_id = site[2]
+            temp_second_id = site[3]
+
+            vip_site.append([domains, temp_zero_id, temp_first_id, temp_second_id])
+
+        return vip_site
 
     def is_vip(self, content):
         '''
@@ -53,7 +64,7 @@ class VipChecked(threading.Thread):
             return False
 
         for site in self._vip_sites:
-            domains = site[0].split(',')
+            domains = site[0]
             temp_zero_id = site[1]
             temp_first_id = site[2]
             temp_second_id = site[3]
