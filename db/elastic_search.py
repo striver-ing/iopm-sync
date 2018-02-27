@@ -113,7 +113,7 @@ class ES():
 
         try:
             table = table.lower()
-            datas = self._es.search(index = table, body = body)
+            datas = self._es.search(index = table, body = body, request_timeout = 30)
 
         except Exception as e:
             log.error(e)

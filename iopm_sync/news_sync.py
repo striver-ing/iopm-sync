@@ -85,8 +85,12 @@ if __name__ == '__main__':
         else:
             threads = []
             deal_news_count = len(news_article_list) // THREAD_COUNT
+            i = 1
             while news_article_list:
                 # 多线程处理，每线程10个
+                print('开启线程%d'%i)
+                i += 1
+
                 thread = threading.Thread(target = news_sync.deal_news_article, args = (news_article_list[:deal_news_count],))
                 del news_article_list[:deal_news_count]
                 thread.start()

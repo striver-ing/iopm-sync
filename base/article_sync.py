@@ -117,12 +117,13 @@ class ArticleSync():
         ---------
         @result:
         '''
+        log.debug("取代做种子集...")
 
         per_record_time = self.get_per_record_time()
 
         if per_record_time:
             body = {
-                "size":10000,
+                "size":1500,
                 "query": {
                     "filtered": {
                       "filter": {
@@ -151,7 +152,7 @@ class ArticleSync():
                 #       }
                 #     }
                 # },
-                "size":10000,
+                "size":1500,
                 "sort":[{"record_time":"asc"}]
             }
 
