@@ -128,6 +128,6 @@ def format_keywords(keywords):
 
 
 if __name__ == '__main__':
-    keywords = '(3213)'
+    keywords = '发的 佛挡杀佛'
     print(format_keywords(keywords))
 

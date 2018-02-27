@@ -19,25 +19,33 @@ class VipChecked(threading.Thread):
         self._vip_sites = []
 
         self._oracledb = OracleDB()
-
-        self.load_vip_site()
+        self._vip_sites = self.load_vip_site()
 
     def run(self):
         while True:
             tools.delay_time(60 * 60)
             print('更新主流媒体...')
-            self.load_vip_site()
+            self._vip_sites = self.load_vip_site()
             print('更新主流媒体完毕')
 
     def load_vip_site(self):
+        vip_site = []
+
         sql = 'select to_char(t.keyword2),t.zero_id,t.first_id, t.second_id from TAB_IOPM_CLUES t where zero_id = 7'
         sites = self._oracledb.find(sql)
         for site in sites:
-            self._vip_sites.append(site)
+            domains = site[0].split(',')
+            if '' in domains:
+                domains.remove('')
+            temp_zero_id = site[1]
+            temp_first_id = site[2]
+            temp_second_id = site[3]
 
-        # print(self._vip_sites)
+            vip_site.append([domains, temp_zero_id, temp_first_id, temp_second_id])
 
-    def is_vip(self, content):
+        return vip_site
+
+    def is_vip(self, domain, website_name):
         '''
         @summary: 判断是否是主流媒体
         ---------
@@ -53,18 +61,15 @@ class VipChecked(threading.Thread):
         is_vip = 0
         zero_id = first_id = second_id =  ''
 
-        if not content:
-            return False
-
         for site in self._vip_sites:
-            domains = site[0].split(',')
+            domains = site[0]
             temp_zero_id = site[1]
             temp_first_id = site[2]
             temp_second_id = site[3]
 
-            for domain in domains:
+            for domain_temp in domains:
                 if domain:
-                    is_vip = ((domain in content) or (content in domain))
+                    is_vip = domain == domain_temp or website_name == domain_temp
 
                     if is_vip:
                         # print(is_vip, domain)
@@ -81,5 +86,5 @@ class VipChecked(threading.Thread):
 if __name__ == '__main__':
     vip_checked = VipChecked()
     vip_checked.start()
-    is_vip = vip_checked.is_vip('http://mp.weixin.qq.com/s?__biz=MzAxNDI5NTY2NQ==&mid=2650646782&idx=2&sn=00cfa2dac81ec96c1731482bbe7dc821&scene=0#wechat_redirect')
+    is_vip = vip_checked.is_vip('huanqiu.com', '环球网')
     print(is_vip)

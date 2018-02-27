@@ -1,4 +1,4 @@
-curl -XPUT "http://10.100.8.23:9200/tab_iopm_hot_info_v17.12.14" -d'
+curl -XPUT "http://192.168.60.27:9200/tab_iopm_hot_info_v17.12.14" -d'
 {
     "settings":{
         "number_of_shards":3,
@@ -141,7 +141,7 @@ curl -XPUT "http://10.100.8.23:9200/tab_iopm_hot_info_v17.12.14" -d'
 }'
 
 
-curl -XPUT "http://10.100.8.23:9200/tab_iopm_article_info_v17.12.14" -d'
+curl -XPUT "http://192.168.60.27:9200/tab_iopm_article_info_v17.12.14" -d'
 {
     "settings":{
         "number_of_shards":3,
@@ -274,7 +274,7 @@ curl -XPUT "http://10.100.8.23:9200/tab_iopm_article_info_v17.12.14" -d'
 
 
 
-curl -XPUT "http://10.100.8.23:9200/tab_iopm_clues_v17.12.14" -d'
+curl -XPUT "http://192.168.60.27:9200/tab_iopm_clues_v17.12.14" -d'
 {
     "settings":{
         "number_of_shards":3,
@@ -327,7 +327,7 @@ curl -XPUT "http://10.100.8.23:9200/tab_iopm_clues_v17.12.14" -d'
     }
 }'
 
-curl -XPUT "http://10.100.8.23:9200/tab_iopm_article_clues_src_v17.12.14" -d'
+curl -XPUT "http://192.168.60.27:9200/tab_iopm_article_clues_src_v17.12.14" -d'
 {
     "settings":{
         "number_of_shards":3,

@@ -27,6 +27,7 @@ class HotSync():
         release_day = release_time[:release_time.find(' ')]
 
         body = {
+        "size":1,
           "query": {
             "filtered": {
               "filter": {

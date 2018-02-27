@@ -122,6 +122,7 @@ class ArticleSync():
 
         if per_record_time:
             body = {
+                "size":10000,
                 "query": {
                     "filtered": {
                       "filter": {
@@ -150,6 +151,7 @@ class ArticleSync():
                 #       }
                 #     }
                 # },
+                "size":10000,
                 "sort":[{"record_time":"asc"}]
             }
 
@@ -225,8 +227,16 @@ class ArticleSync():
                     article_clues_srcs.append(article_clues_src)
                     self._yqtj_es.add_batch(article_clues_srcs, "ID", 'tab_iopm_article_clues_src')
 
+            # 词语图
+            word_cloud = self._word_cloud.get_word_cloud(del_tag_content)
+            article_info['WORD_CLOUD'] = tools.dumps_json(word_cloud)
+
+            # 摘要
+            if not article_info['SUMMARY']:
+                article_info['SUMMARY'] = self._summary.get_summary(del_tag_content)
+
             # 情感分析 (1 正 2 负 3 中立， 百度：0:负向，1:中性，2:正向)
-            emotion = self._emotion.get_emotion(del_tag_content)
+            emotion = self._emotion.get_emotion(article_info['SUMMARY'])
             if emotion == 0:
                 emotion = 2
 
@@ -242,7 +252,7 @@ class ArticleSync():
             article_info['EMOTION'] = emotion
 
             # 主流媒体
-            is_vip, zero_id, first_id, second_id = self._vip_checked.is_vip(article_info['URL']) or self._vip_checked.is_vip(article_info['WEBSITE_NAME']) or self._vip_checked.is_vip(article_info['AUTHOR'])
+            is_vip, zero_id, first_id, second_id = self._vip_checked.is_vip(article_info['HOST'], article_info['WEBSITE_NAME'])
             article_info["IS_VIP"] = is_vip
             if is_vip:
                 article_info['ZERO_ID'] = article_info['ZERO_ID'] + ',' + zero_id
@@ -262,15 +272,6 @@ class ArticleSync():
 
             result = tools.get_json_by_requests(url, data = data)
             article_info['WEIGHT'] = result.get('weight', 0) * weight_factor
-
-
-            # 词语图
-            word_cloud = self._word_cloud.get_word_cloud(del_tag_content)
-            article_info['WORD_CLOUD'] = tools.dumps_json(word_cloud)
-
-            # 摘要
-            if not article_info['SUMMARY']:
-                article_info['SUMMARY'] = self._summary.get_summary(del_tag_content)
 
             # 统计相似文章 热点
             if article_info['INFO_TYPE'] == 3: # 微博
@@ -294,15 +295,15 @@ class ArticleSync():
 
 
             # print(tools.dumps_json(article_info))
-            # article_infos.append(article_info)
+            article_infos.append(article_info)
 
-            print('article入库')
-            self._yqtj_es.add('tab_iopm_article_info', article_info, article_info["ID"])
+            # print('article入库')
+            # self._yqtj_es.add('tab_iopm_article_info', article_info, article_info["ID"])
 
         # article入库 批量
-        # print('article入库')
-        # # print(tools.dumps_json(article_infos))
-        # self._yqtj_es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
+        print('article批量入库 size = %s' %len(article_infos))
+        # print(tools.dumps_json(article_infos))
+        self._yqtj_es.add_batch(article_infos, "ID", 'tab_iopm_article_info')
 
 if __name__ == '__main__':
     pass
