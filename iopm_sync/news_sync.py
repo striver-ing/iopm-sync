@@ -84,7 +84,8 @@ if __name__ == '__main__':
             tools.delay_time(SLEEP_TIME)
         else:
             threads = []
-            deal_news_count = len(news_article_list) // THREAD_COUNT
+            article_size = len(news_article_list)
+            deal_news_count = article_size // THREAD_COUNT if article_size > THREAD_COUNT else 1
             i = 1
             while news_article_list:
                 # 多线程处理，每线程10个
