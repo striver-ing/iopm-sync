@@ -81,6 +81,7 @@ if __name__ == '__main__':
     while True:
         news_article_list = news_sync.get_article()
         if not news_article_list:
+            log.debug('同步数据到最新 sleep %ds ...'%SLEEP_TIME)
             tools.delay_time(SLEEP_TIME)
         else:
             threads = []
