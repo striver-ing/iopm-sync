@@ -32,21 +32,22 @@ class Singleton(object):
         return cls._inst
 
 
-class OracleDB(Singleton):
+# class OracleDB(Singleton):
+class OracleDB():
     def __init__(self, ip = IP, port = PORT, db = DB, user_name = USER_NAME, user_pass = USER_PASS):
-        super(OracleDB, self).__init__()
+        # super(OracleDB, self).__init__()
 
         if STOP_ORCL:
             return
 
-        if not hasattr(self,'conn'):
-            try:
-                self.conn = cx_Oracle.connect(user_name, user_pass, '%s:%d/%s'%(ip, port, db))#, threaded=True,events = True)
-                self.cursor = self.conn.cursor()
-            except Exception as e:
-                raise
-            else:
-                log.debug('连接到数据库 %s'%db)
+        # if not hasattr(self,'conn'):
+        try:
+            self.conn = cx_Oracle.connect(user_name, user_pass, '%s:%d/%s'%(ip, port, db))#, threaded=True,events = True)
+            self.cursor = self.conn.cursor()
+        except Exception as e:
+            raise
+        else:
+            log.debug('连接到数据库 %s'%db)
 
     def __cover_clob_to_str(self, datas):
         for i in range(len(datas)):
@@ -189,6 +190,6 @@ if __name__ == '__main__':
     # db.find("select ID,TITLE,to_char(CONTENT) as CONTENT,URL,WEBSITE_NAME,IMAGE_URL,to_char(RELEASE_TIME, 'yyyy-mm-dd hh24:mi:ss') as RELEASE_TIME,to_char(RECORD_TIME, 'yyyy-mm-dd hh24:mi:ss') as RECORD_TIME,CLUES_IDS,KEYWORDS,EMOTION,REVIEW_COUNT,ACCOUNT,UUID,COMMENT_COUNT,AUTHOR,INFO_TYPE,UP_COUNT,KEYWORDS_COUNT,HOST,HOT_ID,MAY_INVALID,KEYWORD_CLUES_ID,WEIGHT,IS_VIP from TAB_IOPM_ARTICLE_INFO t where rownum <= 5", to_json = True)
 
 
-    sql = "select * from TAB_IOPM_ARTICLE_INFO"
-    result = db.find(sql, to_json = True)
-    print(result)
+    # sql = "select * from TAB_IOPM_ARTICLE_INFO"
+    # result = db.find(sql, to_json = True)
+    # print(result)
