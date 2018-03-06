@@ -24,10 +24,10 @@ from base.province_filter import ProvinceFilter
 DATA_POOL = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
 YQTJ = tools.get_conf_value('config.conf', 'elasticsearch', 'yqtj')
 PROVINCE = tools.get_conf_value('config.conf', 'province', 'province')
+IOPM_SERVICE_ADDRESS = tools.get_conf_value('config.conf', 'iopm_service', 'address')
+SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
 
 SYNC_TIME_FILE = 'iopm_sync/sync_time/'
-IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
-SLEEP_TIME = int(tools.get_conf_value('config.conf', 'sync', 'sleep_time'))
 
 class ArticleSync():
     def __init__(self, table):

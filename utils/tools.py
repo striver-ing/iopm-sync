@@ -817,6 +817,24 @@ def format_date(date, old_format = '', new_format = '%Y-%m-%d %H:%M:%S'):
         date_str = date
     return date_str
 
+def to_date(date_str, date_format = '%Y-%m-%d %H:%M:%S'):
+    return datetime.datetime.strptime(date_str, date_format)
+
+def get_before_date(current_date, days, current_date_format = '%Y-%m-%d %H:%M:%S', return_date_format = '%Y-%m-%d %H:%M:%S'):
+    '''
+    @summary: 获取之前时间
+    ---------
+    @param current_date: 当前时间 datetime类型
+    @param days: 时间间隔 -1 表示前一天 1 表示后一天
+    @param days: 返回的时间格式
+    ---------
+    @result: 字符串
+    '''
+
+    current_date = to_date(current_date, current_date_format)
+    date_obj = current_date + datetime.timedelta(days = days)
+    return datetime.datetime.strftime(date_obj, return_date_format)
+
 def delay_time(sleep_time = 160):
     '''
     @summary: 睡眠  默认1分钟
