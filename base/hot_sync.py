@@ -19,6 +19,13 @@ import random
 MIN_SIMILARITY = 0.5 # 相似度阈值
 IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
 
+INFO_WEIGHT = {
+    1: 5.5, # 新闻
+    2: 2.5, # 微信
+    3: 0.5,  # 微博
+    8: 1.5,  # 视频
+}
+
 class HotSync():
     def __init__(self):
         self._es = ES()
@@ -55,6 +62,7 @@ class HotSync():
                 "TITLE",
                 "CONTENT",
                 "HOT",
+                "ARTICLE_COUNT",
                 "CLUES_IDS",
                 "VIP_COUNT",
                 "NEGATIVE_EMOTION_COUNT"
@@ -100,8 +108,9 @@ class HotSync():
             if similar_hot["ID"] != article_info["ID"]: # 防止同一个舆情 比较多次
                 data = {}
 
-                # 更新热点的热度
-                data["HOT"] = similar_hot["HOT"] + 1
+                # 更新热点的热度与文章数
+                data['HOT'] = similar_hot['HOT'] + INFO_WEIGHT.get(article_info["INFO_TYPE"], 0)
+                data["ARTICLE_COUNT"] = similar_hot["ARTICLE_COUNT"] + 1
 
                 # 更新主流媒体数量及负面舆情数量
                 data["VIP_COUNT"] = similar_hot['VIP_COUNT'] + (1 if article_info["IS_VIP"] else 0)
@@ -143,8 +152,12 @@ class HotSync():
             hot_info['VIP_COUNT'] = 1 if article_info["IS_VIP"] else 0
             hot_info['NEGATIVE_EMOTION_COUNT'] = 1 if article_info['EMOTION'] == 2 else 0
 
-            hot_info['HOT'] = 1
+            hot_info['HOT'] = INFO_WEIGHT.get(article_info["INFO_TYPE"], 0)
             hot_info['ID'] = article_info.get("ID")
+            hot_info['ARTICLE_COUNT'] = 1
+            hot_info['HOT_KEYWORDS'] = ''  # 关键词 TODO
+            hot_info['POSITIONS'] = ''  # 地名 TODO
+            hot_info['EVENT_IDS'] = ''  # 事件类型 TODO
 
             self._es.add('tab_iopm_hot_info', hot_info, data_id = hot_info['ID'])
 
@@ -152,5 +165,6 @@ class HotSync():
             return hot_info['ID']
 
 if __name__ == '__main__':
-    hot_sync = HotSync()
-    hot_sync._get_today_hots('直播')
+    # hot_sync = HotSync()
+    # hot_sync._get_today_hots('直播')
+    print(INFO_WEIGHT.get(1))

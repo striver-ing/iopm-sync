@@ -256,9 +256,9 @@ class ArticleSync():
             is_vip, zero_id, first_id, second_id = self._vip_checked.is_vip(article_info['HOST'], article_info['WEBSITE_NAME'])
             article_info["IS_VIP"] = is_vip
             if is_vip:
-                article_info['ZERO_ID'] = article_info['ZERO_ID'] + ',' + zero_id
-                article_info['FIRST_ID'] = article_info['FIRST_ID'] + ',' + first_id
-                article_info['SECOND_ID'] = article_info['SECOND_ID'] + ',' + second_id
+                article_info['ZERO_ID'] = article_info['ZERO_ID'] + ',' + zero_id if article_info['ZERO_ID'] else zero_id
+                article_info['FIRST_ID'] = article_info['FIRST_ID'] + ',' + first_id if article_info['FIRST_ID'] else first_id
+                article_info['SECOND_ID'] = article_info['SECOND_ID'] + ',' + second_id if article_info['SECOND_ID'] else second_id
 
             # 计算相关度
             url = IOPM_SERVICE_ADDRESS + 'related_sort'

@@ -62,6 +62,9 @@ class NewsSync(ArticleSync):
 
             # article_info['RELEASE_TIME'] = tools.get_current_date()
             article_info['URL'] = news.get('url')
+            if 'http://search.haiwainet.cn' in  article_info['URL']:
+                continue
+
             article_info['UUID'] = news.get('uuid')
             article_info['WEBSITE_NAME'] = news.get('website') or news.get('domain')
             article_info['AUTHOR'] = news.get('author')
