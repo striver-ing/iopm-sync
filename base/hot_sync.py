@@ -16,6 +16,7 @@ from cluster.compare_text import compare_text
 from copy import deepcopy
 from base.hot_week_sync import HotWeekSync
 import random
+from utils.cut_text import CutText
 
 MIN_SIMILARITY = 0.5 # 相似度阈值
 IOPM_SERVICE_ADDRESS = tools.get_conf_value('config.conf', 'iopm_service', 'address')
@@ -31,6 +32,8 @@ class HotSync():
     def __init__(self):
         self._es = ES()
         self._hot_week_sync = HotWeekSync()
+        self._cut_text = CutText()
+        self._cut_text.set_stop_words('utils/stop_words.txt')
 
     def _get_today_hots(self, text, release_time):
         release_day = release_time[:release_time.find(' ')]
@@ -171,7 +174,7 @@ class HotSync():
             hot_info['HOT'] = INFO_WEIGHT.get(article_info["INFO_TYPE"], 0)
             hot_info['ID'] = article_info.get("ID")
             hot_info['ARTICLE_COUNT'] = 1
-            hot_info['HOT_KEYWORDS'] = ''  # 关键词 TODO
+            hot_info['HOT_KEYWORDS'] = ','.join(self._cut_text.cut_for_keyword(article_info["TITLE"]))  # 关键词 TODO
             hot_info['POSITIONS'] = positions
             hot_info['EVENT_IDS'] = ''  # 事件类型（每日热点不需要 TODO | 每周热点已加）
 

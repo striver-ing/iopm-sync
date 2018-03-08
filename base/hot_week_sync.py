@@ -143,12 +143,12 @@ class HotWeekSync():
             # 将该舆情添加为热点
             hot_info = deepcopy(day_hot)
 
-            # 处理热点类型
+            # 处理事件类型
             del_tag_content = tools.del_html_tag(hot_info['CONTENT'])
             text = hot_info['TITLE'] + del_tag_content
             contain_event_ids = self._event_filter.find_contain_event(text)
-
             hot_info['EVENT_IDS'] = ','.join(contain_event_ids)
+
             hot_info['HOT_DAY_IDS'] = day_hot.get("ID")
 
             self._es.add('tab_iopm_hot_week_info', hot_info, data_id = hot_info['ID'])

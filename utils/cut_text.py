@@ -154,7 +154,7 @@ if __name__ == '__main__':
 “一带一路”倡议得到有力支持。中哈两国发表的《联合声明》及上合组织发表的《阿斯塔纳宣言》等文件均充分肯定“一带一路”的积极意义，高度评价并支持落实高峰论坛成果。各国领导人表示愿继续积极响应和参与“一带一路”建设。通过习近平主席这次访问，我们再次深刻感受到，“一带一路”倡议已成为广受欢迎的国际公共产品，使各国抓到合作机遇，看到发展希望。国际上认同“一带一路”的共识越来越多，预期越来越乐观。
     '''
     # text =  'The company reported close to a 2 percent rise in operating profit for the second quarter, when compared with the same period last year.'
-    # text = '我今天 很不开心'
+    text = '国家版权局公布2017年中国版权十件大事'
     cut_text = CutText()
     # # cut_text.set_stop_words('stop_word.txt')
     # import time
@@ -163,6 +163,6 @@ if __name__ == '__main__':
     # print(time.time() - b)
     # print(cut_text.cut(text, True))
     # print(cut_text.cut_for_search(text))
-    # print(cut_text.cut_for_property(text))
-    # print(cut_text.cut_for_keyword(text, with_weight = True, top_keyword_count = 20))
+    print(cut_text.cut_for_property(text))
+    print(cut_text.cut_for_keyword(text, with_weight = False, top_keyword_count = 20))
 
