@@ -85,7 +85,7 @@ class HotSync():
         return hots.get('hits', {}).get('hits', [])
 
 
-    def get_hot_id(self, article_info):
+    def get_hot_id(self, article_info, positions):
         '''
         @summary: 聚类
         ---------
@@ -135,7 +135,7 @@ class HotSync():
                     data_args = {
                         'hot_id': similar_hot['ID'], # 文章id
                         'hot_value' :data['HOT'], # 热度值
-                        'clues_id': similar_hot['CLUES_IDS'],  #相关舆情匹配到的线索id
+                        'clues_ids': similar_hot['CLUES_IDS'],  #相关舆情匹配到的线索id
                         'article_count' : data['ARTICLE_COUNT'], # 文章总数
                         'vip_count': data["VIP_COUNT"],   # 主流媒体数
                         'negative_emotion_count': data["NEGATIVE_EMOTION_COUNT"],  # 负面情感数
@@ -172,7 +172,7 @@ class HotSync():
             hot_info['ID'] = article_info.get("ID")
             hot_info['ARTICLE_COUNT'] = 1
             hot_info['HOT_KEYWORDS'] = ''  # 关键词 TODO
-            hot_info['POSITIONS'] = ''  # 地名 TODO
+            hot_info['POSITIONS'] = positions
             hot_info['EVENT_IDS'] = ''  # 事件类型 TODO
 
             self._es.add('tab_iopm_hot_info', hot_info, data_id = hot_info['ID'])

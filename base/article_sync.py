@@ -278,7 +278,7 @@ class ArticleSync():
             if article_info['INFO_TYPE'] == 3: # 微博
                 article_info['TITLE']  = article_info['SUMMARY'][:30]
 
-            article_info['HOT_ID'] = self._hot_sync.get_hot_id(article_info)
+            article_info['HOT_ID'] = self._hot_sync.get_hot_id(article_info, ','.join(contain_airs))
 
             log.debug('''
                 title         %s
