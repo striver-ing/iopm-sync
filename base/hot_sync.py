@@ -58,19 +58,19 @@ class HotSync():
                 }
               }
             }
-          },
-          "_source": [
-                "ID",
-                "TITLE",
-                # "CONTENT",
-                "RELEASE_TIME",
-                "WEIGHT",
-                "HOT",
-                "ARTICLE_COUNT",
-                "CLUES_IDS",
-                "VIP_COUNT",
-                "NEGATIVE_EMOTION_COUNT"
-          ],
+          }#,
+          # "_source": [
+          #       "ID",
+          #       "TITLE",
+          #       # "CONTENT",
+          #       "RELEASE_TIME",
+          #       "WEIGHT",
+          #       "HOT",
+          #       "ARTICLE_COUNT",
+          #       "CLUES_IDS",
+          #       "VIP_COUNT",
+          #       "NEGATIVE_EMOTION_COUNT"
+          # ],
           # "highlight": {
           #       "fields": {
           #           "TITLE": {}

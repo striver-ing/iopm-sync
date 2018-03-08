@@ -78,7 +78,7 @@ class HotWeekSync():
         return hots.get('hits', {}).get('hits', [])
 
 
-    def cluster_week_hot(self, hot, hot_value = None, article_count = None, vip_count = None, negative_emotion_count = None, weight = None):
+    def cluster_week_hot(self, day_hot, hot_value = None, article_count = None, vip_count = None, negative_emotion_count = None, weight = None):
         '''
         @summary: 聚类
         ---------
@@ -93,8 +93,8 @@ class HotWeekSync():
         '''
 
 
-        article_text = hot.get("TITLE")# + hot.get("CONTENT")
-        release_time = hot.get("RELEASE_TIME")
+        article_text = day_hot.get("TITLE")# + hot.get("CONTENT")
+        release_time = day_hot.get("RELEASE_TIME")
 
         article_text = tools.del_html_tag(article_text)
 
@@ -116,23 +116,23 @@ class HotWeekSync():
             break #hots 按照匹配值排序后，第一个肯定是最相似的，无需向后比较
 
         if similar_hot:# 找到相似的热点
-            if similar_hot["ID"] != hot["ID"]: # 防止同一个舆情 比较多次
+            if similar_hot["ID"] != day_hot["ID"]: # 防止同一个舆情 比较多次
                 data = {}
 
                 # 更新热点的热度与文章数
-                data['HOT'] = similar_hot['HOT'] + (hot_value or hot.get('HOT'))
-                data["ARTICLE_COUNT"] = similar_hot["ARTICLE_COUNT"] + (article_count or hot.get('ARTICLE_COUNT'))
+                data['HOT'] = similar_hot['HOT'] + (hot_value or day_hot.get('HOT'))
+                data["ARTICLE_COUNT"] = similar_hot["ARTICLE_COUNT"] + (article_count or day_hot.get('ARTICLE_COUNT'))
 
                 # 更新主流媒体数量及负面舆情数量
-                data["VIP_COUNT"] = similar_hot['VIP_COUNT'] + (vip_count or hot.get('VIP_COUNT'))
+                data["VIP_COUNT"] = similar_hot['VIP_COUNT'] + (vip_count or day_hot.get('VIP_COUNT'))
                 data["NEGATIVE_EMOTION_COUNT"] = similar_hot['NEGATIVE_EMOTION_COUNT'] + (negative_emotion_count or hot.get('NEGATIVE_EMOTION_COUNT'))
 
                 # 更新相关度
-                data['WEIGHT'] = similar_hot['WEIGHT'] + (weight or hot['WEIGHT'])
+                data['WEIGHT'] = similar_hot['WEIGHT'] + (weight or day_hot['WEIGHT'])
 
                 # 更新 hot_day_ids
                 if not hot_value:
-                    data["HOT_DAY_IDS"] = similar_hot['HOT_DAY_IDS'] + ',' + hot['ID']
+                    data["HOT_DAY_IDS"] = similar_hot['HOT_DAY_IDS'] + ',' + day_hot['ID']
 
                 # 更新热点
                 self._es.update_by_id("tab_iopm_hot_week_info", data_id = similar_hot.get("ID"), data = data)
@@ -141,7 +141,7 @@ class HotWeekSync():
             return similar_hot.get("ID")
         else:
             # 将该舆情添加为热点
-            hot_info = deepcopy(hot)
+            hot_info = deepcopy(day_hot)
 
             # 处理热点类型
             del_tag_content = tools.del_html_tag(hot_info['CONTENT'])
@@ -149,7 +149,7 @@ class HotWeekSync():
             contain_event_ids = self._event_filter.find_contain_event(text)
 
             hot_info['EVENT_IDS'] = ','.join(contain_event_ids)
-            hot_info['HOT_DAY_IDS'] = hot.get("ID")
+            hot_info['HOT_DAY_IDS'] = day_hot.get("ID")
 
             self._es.add('tab_iopm_hot_week_info', hot_info, data_id = hot_info['ID'])
 
