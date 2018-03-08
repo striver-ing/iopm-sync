@@ -174,7 +174,7 @@ class HotSync():
             hot_info['HOT'] = INFO_WEIGHT.get(article_info["INFO_TYPE"], 0)
             hot_info['ID'] = article_info.get("ID")
             hot_info['ARTICLE_COUNT'] = 1
-            hot_info['HOT_KEYWORDS'] = ','.join(self._cut_text.cut_for_keyword(article_info["TITLE"]))  # 关键词 TODO
+            hot_info['HOT_KEYWORDS'] = ','.join(self._cut_text.cut_for_keyword(article_info["TITLE"]))  # 关键词 可优化速度  在比较相似度时已经分词了 TODO
             hot_info['POSITIONS'] = positions
             hot_info['EVENT_IDS'] = ''  # 事件类型（每日热点不需要 TODO | 每周热点已加）
 
