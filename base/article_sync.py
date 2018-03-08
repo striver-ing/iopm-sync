@@ -20,6 +20,7 @@ from summary.summary import Summary
 from emotion.emotion import Emotion
 from utils.log import log
 from base.province_filter import ProvinceFilter
+from base.event_filter import EventFilter # 标记事件类别 移到每周热点
 
 DATA_POOL = tools.get_conf_value('config.conf', 'elasticsearch', 'data-pool')
 YQTJ = tools.get_conf_value('config.conf', 'elasticsearch', 'yqtj')
@@ -42,11 +43,13 @@ class ArticleSync():
         self._hot_sync = HotSync()
         self._vip_checked = VipChecked()
         self._province_filter = ProvinceFilter()
+        # self._event_filter = EventFilter()
         self._table = table
         self._per_record_time_key = '{table}_record_time'.format(table = self._table)
 
         self._vip_checked.start()
         self._compare_keywords.start()
+        # self._event_filter.start()
 
     def get_article_info(self):
         '''
@@ -199,7 +202,7 @@ class ArticleSync():
             # print(text)
 
             # 地域过滤
-            contain_airs = self._province_filter.find_contain_air(text)
+            contain_airs = ','.join(self._province_filter.find_contain_air(text))
             weight_factor = 1 # 权重系数
             if not contain_airs and PROVINCE:
                 # log.debug('%s 不包含 本地地名 pass' % article_info['TITLE'])
@@ -208,7 +211,7 @@ class ArticleSync():
             # 线索关键词比对
             keywords, clues_ids, zero_ids, first_ids, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
 
-            article_info['KEYWORDS'] = keywords + ',' + ','.join(contain_airs) if keywords else ','.join(contain_airs)
+            article_info['KEYWORDS'] = keywords + ',' + contain_airs if keywords else contain_airs
             article_info['CLUES_IDS'] = clues_ids
             article_info['ZERO_ID'] = zero_ids
             article_info['FIRST_ID'] = first_ids
@@ -216,17 +219,17 @@ class ArticleSync():
             article_info['KEYWORDS_COUNT'] = len(keyword_clues)
             article_info['KEYWORD_CLUES_ID'] = str(keyword_clues)
 
-            # 线索与舆情中间表
-            article_clues_srcs = []
-            if clues_ids:
-                for clues_id in clues_ids.split(','):
-                    article_clues_src = self.get_article_clues_src()
-                    article_clues_src['ID'] =  tools.get_uuid(clues_id, article_info['ID'])
-                    article_clues_src['CLUES_ID'] =  clues_id
-                    article_clues_src['ARTICLE_ID'] = article_info['ID']
+            # # 线索与舆情中间表
+            # article_clues_srcs = []
+            # if clues_ids:
+            #     for clues_id in clues_ids.split(','):
+            #         article_clues_src = self.get_article_clues_src()
+            #         article_clues_src['ID'] =  tools.get_uuid(clues_id, article_info['ID'])
+            #         article_clues_src['CLUES_ID'] =  clues_id
+            #         article_clues_src['ARTICLE_ID'] = article_info['ID']
 
-                    article_clues_srcs.append(article_clues_src)
-                    self._yqtj_es.add_batch(article_clues_srcs, "ID", 'tab_iopm_article_clues_src')
+            #         article_clues_srcs.append(article_clues_src)
+            #         self._yqtj_es.add_batch(article_clues_srcs, "ID", 'tab_iopm_article_clues_src')
 
             # 词语图
             word_cloud = self._word_cloud.get_word_cloud(del_tag_content)
@@ -278,7 +281,7 @@ class ArticleSync():
             if article_info['INFO_TYPE'] == 3: # 微博
                 article_info['TITLE']  = article_info['SUMMARY'][:30]
 
-            article_info['HOT_ID'] = self._hot_sync.get_hot_id(article_info, ','.join(contain_airs))
+            article_info['HOT_ID'] = self._hot_sync.get_hot_id(article_info, contain_airs)
 
             log.debug('''
                 title         %s
