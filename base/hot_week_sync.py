@@ -15,6 +15,7 @@ from db.elastic_search import ES
 from cluster.compare_text import compare_text
 from copy import deepcopy
 import random
+from base.event_filter import EventFilter
 
 MIN_SIMILARITY = 0.5 # 相似度阈值
 IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
@@ -22,6 +23,8 @@ IOPM_SERVICE_ADDRESS = 'http://localhost:8080/'
 class HotWeekSync():
     def __init__(self):
         self._es = ES()
+        self._event_filter = EventFilter()
+        self._event_filter.start()
 
     def _get_week_hots(self, text, release_time):
         before_week = tools.get_before_date(release_time, -7)
@@ -139,6 +142,13 @@ class HotWeekSync():
         else:
             # 将该舆情添加为热点
             hot_info = deepcopy(hot)
+
+            # 处理热点类型
+            del_tag_content = tools.del_html_tag(hot_info['CONTENT'])
+            text = article_info['TITLE'] + del_tag_content
+            contain_event_ids = self._event_filter.find_contain_event(text)
+
+            hot_info['EVENT_IDS'] = ','.join(contain_event_ids)
             hot_info['HOT_DAY_IDS'] = hot.get("ID")
 
             self._es.add('tab_iopm_hot_week_info', hot_info, data_id = hot_info['ID'])

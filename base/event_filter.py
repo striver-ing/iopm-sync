@@ -13,13 +13,21 @@ import init
 import utils.tools as tools
 from utils.log import log
 from db.oracledb import OracleDB
+import threading
 
-class EventFilter():
+class EventFilter(threading.Thread):
     def __init__(self):
-        print(1)
+        super(EventFilter, self).__init__()
+
         self._db = OracleDB()
         self._event_knowledges = self.load_event_knowledges()
-        print(self._event_knowledges)
+
+    def run(self):
+        while True:
+            tools.delay_time(60 * 60)
+            print('更新事件知识库...')
+            self._event_knowledges = self.load_event_knowledges()
+            print('更新事件知识库完毕')
 
     def load_event_knowledges(self):
         '''
@@ -57,3 +65,7 @@ class EventFilter():
 
 if __name__ == '__main__':
     event_filter = EventFilter()
+    event_filter.start()
+    text = '十九大今日召开,提倡共享'
+    contain_event = event_filter.find_contain_event(text)
+    print(contain_event)

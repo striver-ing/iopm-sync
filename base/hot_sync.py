@@ -173,7 +173,7 @@ class HotSync():
             hot_info['ARTICLE_COUNT'] = 1
             hot_info['HOT_KEYWORDS'] = ''  # 关键词 TODO
             hot_info['POSITIONS'] = positions
-            hot_info['EVENT_IDS'] = ''  # 事件类型 TODO
+            hot_info['EVENT_IDS'] = ''  # 事件类型（每日热点不需要 TODO | 每周热点已加）
 
             self._es.add('tab_iopm_hot_info', hot_info, data_id = hot_info['ID'])
             # 同步7日热点
