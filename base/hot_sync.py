@@ -88,7 +88,7 @@ class HotSync():
         return hots.get('hits', {}).get('hits', [])
 
 
-    def get_hot_id(self, article_info, positions):
+    def get_hot_id(self, article_info, positions, weight_factor):
         '''
         @summary: 聚类
         ---------
@@ -124,7 +124,7 @@ class HotSync():
                 data = {}
 
                 # 更新热点的热度与文章数
-                data['HOT'] = similar_hot['HOT'] + INFO_WEIGHT.get(article_info["INFO_TYPE"], 0)
+                data['HOT'] = similar_hot['HOT'] + INFO_WEIGHT.get(article_info["INFO_TYPE"], 0) *  weight_factor
                 data["ARTICLE_COUNT"] = similar_hot["ARTICLE_COUNT"] + 1
 
                 # 更新主流媒体数量及负面舆情数量
@@ -147,7 +147,7 @@ class HotSync():
 
                     result = tools.get_json_by_requests(url, data = data_args)
                     weight_temp = similar_hot['WEIGHT'] - result.get('weight', 0)
-                    data['WEIGHT'] = result.get('weight', 0)
+                    data['WEIGHT'] = result.get('weight', 0) * weight_factor
 
                 # 更新热点
                 self._es.update_by_id("tab_iopm_hot_info", data_id = similar_hot.get("ID"), data = data)
@@ -171,7 +171,7 @@ class HotSync():
             hot_info['VIP_COUNT'] = 1 if article_info["IS_VIP"] else 0
             hot_info['NEGATIVE_EMOTION_COUNT'] = 1 if article_info['EMOTION'] == 2 else 0
 
-            hot_info['HOT'] = INFO_WEIGHT.get(article_info["INFO_TYPE"], 0)
+            hot_info['HOT'] = INFO_WEIGHT.get(article_info["INFO_TYPE"], 0) * weight_factor
             hot_info['ID'] = article_info.get("ID")
             hot_info['ARTICLE_COUNT'] = 1
             hot_info['HOT_KEYWORDS'] = ','.join(self._cut_text.cut_for_keyword(article_info["TITLE"]))  # 关键词 TODO
