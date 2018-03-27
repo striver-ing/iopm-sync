@@ -212,6 +212,7 @@ class ArticleSync():
             keywords, clues_ids, zero_ids, first_ids, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
 
             article_info['KEYWORDS'] = keywords + ',' + contain_airs if keywords else contain_airs
+            article_info['KEYWORDS'] = list(set(article_info['KEYWORDS'].split(',')))
             article_info['CLUES_IDS'] = clues_ids
             article_info['ZERO_ID'] = zero_ids
             article_info['FIRST_ID'] = first_ids
