@@ -51,9 +51,10 @@ def update_hot(data):
     print(data_title)
     es.update_by_id('tab_iopm_hot_info', data_id, {"HOT": 0})
     es.update_by_id('tab_iopm_article_info', data_id, {"HOT": 0, "WEIGHT":0})
+    es.update_by_id('tab_iopm_hot_week_info', data_id, {"HOT": 0, "WEIGHT":0})
 
 if __name__ == '__main__':
-    text = '招商中證銀行B(150250)'
+    text = '第二届全国龙之队球迷足球联赛浙江赛区'
     data = get_data(text)
-    print(data)
-    # update_hot(data)
+    # print(data)
+    update_hot(data)

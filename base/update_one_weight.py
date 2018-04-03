@@ -41,7 +41,7 @@ def get_data(text):
 
 def update_weight(data):
     data = data[0].get('_source')
-    print(tools.dumps_json(data))
+    # print(tools.dumps_json(data))
     body = {
         'hot_id': data['ID'], # 文章id
         'hot_value' :data['HOT'], # 热度值
@@ -68,8 +68,6 @@ def update_weight(data):
     #     record_time = data['RECORD_TIME']
 
 if __name__ == '__main__':
-    # text = '开弹幕、看直播、忙点赞国外网友原来是这样看两会的'
-    text = '中央台：精布局细打磨和声浓郁'
-    text = '这么多大明星，也救不了浙江卫视综艺的尴尬'
+    text = '20余城掀起“人才争夺战”吸引海外人才成为重头戏'
     data = get_data(text)
     update_weight(data)
