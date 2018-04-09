@@ -123,6 +123,7 @@ class ArticleSync():
         log.debug("取代做种子集...")
 
         per_record_time = self.get_per_record_time()
+        today_time = tools.get_current_date("%Y-%m-%d")
 
         if per_record_time:
             body = {
@@ -139,6 +140,38 @@ class ArticleSync():
                     }
                 },
                 "sort":[{"record_time":"asc"}]
+            }
+
+            body = {
+                "size": 1500,
+                "query": {
+                    "filtered": {
+                        "filter": {
+                            "bool": {
+                                "must":  [
+                                    {
+                                        "range": {
+                                            "record_time": {
+                                                "gt": per_record_time
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "range": {
+                                            "release_time": {
+                                                "gte": today_time + ' 00:00:00', # 今日
+                                                "lte": today_time + ' 23:59:59' # 今日
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "sort": [{
+                    "record_time": "asc"
+                }]
             }
 
         else:
