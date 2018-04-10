@@ -124,6 +124,7 @@ class ArticleSync():
 
         per_record_time = self.get_per_record_time()
         today_time = tools.get_current_date("%Y-%m-%d")
+        three_day_ago = tools.get_before_date(today_time, -3, current_date_format = '%Y-%m-%d', return_date_format = '%Y-%m-%d')
 
         if per_record_time:
             body = {
@@ -159,7 +160,7 @@ class ArticleSync():
                                     {
                                         "range": {
                                             "release_time": {
-                                                "gte": today_time + ' 00:00:00', # 今日
+                                                "gte": three_day_ago + ' 00:00:00', # 三日前
                                                 "lte": today_time + ' 23:59:59' # 今日
                                             }
                                         }
