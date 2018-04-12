@@ -124,24 +124,24 @@ class ArticleSync():
 
         per_record_time = self.get_per_record_time()
         today_time = tools.get_current_date("%Y-%m-%d")
-        three_day_ago = tools.get_before_date(today_time, -3, current_date_format = '%Y-%m-%d', return_date_format = '%Y-%m-%d')
+        min_day_ago = tools.get_before_date(today_time, -30, current_date_format = '%Y-%m-%d', return_date_format = '%Y-%m-%d')
 
         if per_record_time:
-            body = {
-                "size":1500,
-                "query": {
-                    "filtered": {
-                      "filter": {
-                        "range": {
-                            "record_time" : {
-                                "gt": per_record_time
-                            }
-                        }
-                      }
-                    }
-                },
-                "sort":[{"record_time":"asc"}]
-            }
+            # body = {
+            #     "size":1500,
+            #     "query": {
+            #         "filtered": {
+            #           "filter": {
+            #             "range": {
+            #                 "record_time" : {
+            #                     "gt": per_record_time
+            #                 }
+            #             }
+            #           }
+            #         }
+            #     },
+            #     "sort":[{"record_time":"asc"}]
+            # }
 
             body = {
                 "size": 1500,
@@ -160,7 +160,7 @@ class ArticleSync():
                                     {
                                         "range": {
                                             "release_time": {
-                                                "gte": three_day_ago + ' 00:00:00', # 三日前
+                                                "gte": min_day_ago + ' 00:00:00', # 30日前
                                                 "lte": today_time + ' 23:59:59' # 今日
                                             }
                                         }
@@ -177,18 +177,18 @@ class ArticleSync():
 
         else:
             body = {
-                # "query": {
-                #     "filtered": {
-                #       "filter": {
-                #         "range": {
-                #            "release_time" : {
-                #                 "gte": today_time + ' 00:00:00', # 今日
-                #                 "lte": today_time + ' 23:59:59' # 今日
-                #             }
-                #         }
-                #       }
-                #     }
-                # },
+                "query": {
+                    "filtered": {
+                      "filter": {
+                        "range": {
+                           "release_time" : {
+                                "gte": three_day_ago + ' 00:00:00', # 三日前
+                                "lte": today_time + ' 23:59:59' # 今日
+                            }
+                        }
+                      }
+                    }
+                },
                 "size":1500,
                 "sort":[{"record_time":"asc"}]
             }

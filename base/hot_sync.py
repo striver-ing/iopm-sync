@@ -96,7 +96,7 @@ class HotSync():
         ---------
         @result:
         '''
-        weight_factor = 1
+        # weight_factor = 1
 
         article_text = article_info.get("TITLE")# + article_info.get("CONTENT")
         release_time = article_info.get("RELEASE_TIME")
