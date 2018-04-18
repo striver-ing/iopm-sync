@@ -123,38 +123,72 @@ class ArticleSync():
         log.debug("取代做种子集...")
 
         per_record_time = self.get_per_record_time()
+        today_time = tools.get_current_date("%Y-%m-%d")
+        min_day_ago = tools.get_before_date(today_time, -30, current_date_format = '%Y-%m-%d', return_date_format = '%Y-%m-%d')
 
         if per_record_time:
+            # body = {
+            #     "size":1500,
+            #     "query": {
+            #         "filtered": {
+            #           "filter": {
+            #             "range": {
+            #                 "record_time" : {
+            #                     "gt": per_record_time
+            #                 }
+            #             }
+            #           }
+            #         }
+            #     },
+            #     "sort":[{"record_time":"asc"}]
+            # }
+
             body = {
-                "size":1500,
+                "size": 1500,
+                "query": {
+                    "filtered": {
+                        "filter": {
+                            "bool": {
+                                "must":  [
+                                    {
+                                        "range": {
+                                            "record_time": {
+                                                "gt": per_record_time
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "range": {
+                                            "release_time": {
+                                                "gte": min_day_ago + ' 00:00:00', # 30日前
+                                                "lte": today_time + ' 23:59:59' # 今日
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "sort": [{
+                    "record_time": "asc"
+                }]
+            }
+
+        else:
+            body = {
                 "query": {
                     "filtered": {
                       "filter": {
                         "range": {
-                            "record_time" : {
-                                "gt": per_record_time
+                           "release_time" : {
+                                "gte": three_day_ago + ' 00:00:00', # 三日前
+                                "lte": today_time + ' 23:59:59' # 今日
                             }
                         }
                       }
                     }
                 },
-                "sort":[{"record_time":"asc"}]
-            }
-
-        else:
-            body = {
-                # "query": {
-                #     "filtered": {
-                #       "filter": {
-                #         "range": {
-                #            "release_time" : {
-                #                 "gte": today_time + ' 00:00:00', # 今日
-                #                 "lte": today_time + ' 23:59:59' # 今日
-                #             }
-                #         }
-                #       }
-                #     }
-                # },
                 "size":1500,
                 "sort":[{"record_time":"asc"}]
             }
@@ -212,6 +246,7 @@ class ArticleSync():
             keywords, clues_ids, zero_ids, first_ids, second_ids, keyword_clues = self._compare_keywords.get_contained_keys(text)
 
             article_info['KEYWORDS'] = keywords + ',' + contain_airs if keywords else contain_airs
+            article_info['KEYWORDS'] = ','.join(set(article_info['KEYWORDS'].split(',')))
             article_info['CLUES_IDS'] = clues_ids
             article_info['ZERO_ID'] = zero_ids
             article_info['FIRST_ID'] = first_ids
@@ -281,7 +316,7 @@ class ArticleSync():
             if article_info['INFO_TYPE'] == 3: # 微博
                 article_info['TITLE']  = article_info['SUMMARY'][:30]
 
-            article_info['HOT_ID'] = self._hot_sync.get_hot_id(article_info, contain_airs)
+            article_info['HOT_ID'] = self._hot_sync.get_hot_id(article_info, contain_airs, weight_factor)
 
             log.debug('''
                 title         %s

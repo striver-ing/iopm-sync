@@ -25,7 +25,7 @@ class ProvinceFilter():
             province_id = self.load_province_id(province_name)
             if province_id:
                 self._province_airs.extend(air[0] for air in self.load_province_air(province_id))
-                self._province_airs.extend(town[0] for town in self.load_province_town(province_id))
+                # self._province_airs.extend(town[0] for town in self.load_province_town(province_id))
         else:# 全国
             self._province_airs.extend(province[0] for province in self.load_province())
 
