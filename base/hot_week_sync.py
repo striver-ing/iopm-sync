@@ -128,7 +128,7 @@ class HotWeekSync():
                 data["NEGATIVE_EMOTION_COUNT"] = similar_hot['NEGATIVE_EMOTION_COUNT'] + (negative_emotion_count or hot.get('NEGATIVE_EMOTION_COUNT'))
 
                 # 更新相关度
-                data['WEIGHT'] = similar_hot['WEIGHT'] + (weight or day_hot['WEIGHT'])
+                # data['WEIGHT'] = similar_hot['WEIGHT'] + (weight or day_hot['WEIGHT'])
 
                 # 更新 hot_day_ids
                 if not hot_value:
