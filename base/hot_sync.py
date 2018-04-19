@@ -22,10 +22,10 @@ MIN_SIMILARITY = 0.5 # 相似度阈值
 IOPM_SERVICE_ADDRESS = tools.get_conf_value('config.conf', 'iopm_service', 'address')
 
 INFO_WEIGHT = {
-    1: 6.5, # 新闻
-    2: 2.5, # 微信
-    3: 0.5,  # 微博
-    8: 0.5,  # 视频
+    1: 6, # 新闻
+    2: 2, # 微信
+    3: 1,  # 微博
+    8: 1,  # 视频
 }
 
 class HotSync():
