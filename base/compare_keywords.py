@@ -73,11 +73,12 @@ class CompareKeywords(threading.Thread):
                     for unit_key in unit_keys:
                         keyword_clues[unit_key] = clue_id
 
-        return ','.join(set(keywords)), ','.join(set(clues_ids)), ','.join(set(zero_ids)), ','.join(set(first_ids)), ','.join(set(second_ids)), keyword_clues
+        # return ','.join(set(keywords)), ','.join(set(clues_ids)), ','.join(set(zero_ids)), ','.join(set(first_ids)), ','.join(set(second_ids)), keyword_clues
+        return ','.join(set(keywords)), ','.join([str(i) for i in keyword_clues.values()]), ','.join(set(zero_ids)), ','.join(set(first_ids)), ','.join(set(second_ids)), keyword_clues
 
 if __name__ == '__main__':
     compare_keywords = CompareKeywords()
     compare_keywords.start()
-    text = '聂辰席是中央宣传部的聂辰席&国家新闻出版广电总局'
+    text = '聂辰席聂辰席聂辰席是中央宣传部的聂辰席&国家新闻出版广电总局'
 
     print(compare_keywords.get_contained_keys(text))

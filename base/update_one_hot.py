@@ -25,9 +25,9 @@ def get_data(text):
                     "query": text,
                     "fields": [
                         "TITLE"
-                    ],
-                    "operator": "or",
-                    "minimum_should_match": "{percent}%".format(percent = int(0.5 * 100)) # 匹配到的关键词占比
+                    ]#,
+                    # "operator": "or",
+                    # "minimum_should_match": "{percent}%".format(percent = int(0.05 * 100)) # 匹配到的关键词占比
                 }
               }
             }
@@ -40,21 +40,22 @@ def get_data(text):
 
     # 默认按照匹配分数排序
     hots = es.search('tab_iopm_hot_info', body)
-    # print(tools.dumps_json(hots))
+    print(tools.dumps_json(hots))
 
     return hots.get('hits', {}).get('hits', [])
 
 def update_hot(data):
-    data = data[0].get('_source')
-    data_id = data['ID']
-    data_title = data['TITLE']
-    print(data_title)
-    es.update_by_id('tab_iopm_hot_info', data_id, {"HOT": 0})
-    es.update_by_id('tab_iopm_article_info', data_id, {"HOT": 0, "WEIGHT":0})
-    es.update_by_id('tab_iopm_hot_week_info', data_id, {"HOT": 0, "WEIGHT":0})
+    if data:
+        data = data[0].get('_source')
+        data_id = data['ID']
+        data_title = data['TITLE']
+        print(data_title)
+        es.update_by_id('tab_iopm_hot_info', data_id, {"HOT": 0, "WEIGHT":0})
+        es.update_by_id('tab_iopm_article_info', data_id, {"HOT": 0, "WEIGHT":0})
+        es.update_by_id('tab_iopm_hot_week_info', data_id, {"HOT": 0, "WEIGHT":0})
 
 if __name__ == '__main__':
-    text = '第二届全国龙之队球迷足球联赛浙江赛区'
+    text = '上海：给90后讲讲马克思'
     data = get_data(text)
     # print(data)
     update_hot(data)
